@@ -222,6 +222,85 @@
   .md-hr { border: none; border-top: 1px solid var(--gridline); margin: 18px 0; }
   .md-bq { border-left: 3px solid var(--accent); padding: 8px 14px; background: var(--accent-bg); border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 13px; color: var(--text-secondary); }
   .md-empty { color: var(--text-muted); padding: 60px 36px; font-size: 15px; text-align: center; }
+  /* ── Team tab ── */
+  #tab-team { padding: 28px 28px 60px; max-width: 1280px; margin: 0 auto; }
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 14px; margin-top: 16px; }
+  .team-card { background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:border-color .15s; }
+  .team-card:hover { border-color:var(--accent); }
+  .team-card-head { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .team-avatar { width:40px; height:40px; border-radius:50%; background:var(--accent-bg); color:var(--accent); font-weight:700; font-size:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .team-name { font-weight:600; font-size:14px; }
+  .team-role { font-size:12px; color:var(--text-muted); margin-top:1px; }
+  .team-kpi { display:flex; gap:8px; margin-top:8px; }
+  .team-kpi-item { flex:1; background:var(--page); border-radius:8px; padding:8px 10px; }
+  .team-kpi-val { font-size:18px; font-weight:700; }
+  .team-kpi-label { font-size:11px; color:var(--text-muted); }
+  .team-meta { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:12px; color:var(--text-muted); flex-wrap:wrap; }
+  .ts { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .ts.ok { background:var(--good); }
+  .ts.watch { background:var(--warning); }
+  .ts.problem { background:var(--critical); }
+  /* Manager side-panel */
+  .mgr-mo { position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:stretch;justify-content:flex-end; }
+  .mgr-mo.open { display:flex; }
+  .mgr-panel { width:min(580px,100vw);background:var(--surface-1);display:flex;flex-direction:column;overflow:hidden;box-shadow:-8px 0 32px rgba(0,0,0,.15); }
+  .mgr-header { padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0; }
+  .mgr-tabs { display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface-1); }
+  .mgr-tab-btn { padding:10px 18px;font-size:13px;cursor:pointer;color:var(--text-muted);border:none;border-bottom:2px solid transparent;background:none;font:inherit;transition:color .15s; }
+  .mgr-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent); }
+  .mgr-body { flex:1;overflow-y:auto;padding:18px 22px; }
+  .mgr-section { margin-bottom:20px; }
+  .mgr-section-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:10px; }
+  .ipr-item { background:var(--page);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;flex-direction:column;gap:6px; }
+  .ipr-bar-wrap { height:5px;background:var(--gridline);border-radius:3px;overflow:hidden; }
+  .ipr-bar { height:100%;background:var(--accent);border-radius:3px;transition:width .3s; }
+  .meeting-item { border-left:3px solid var(--accent);padding:10px 14px;margin-bottom:8px;background:var(--page);border-radius:0 8px 8px 0; }
+  .meeting-date { font-size:11px;color:var(--text-muted);margin-bottom:4px; }
+  .ob-item { display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--gridline); }
+  .ob-item:last-child { border-bottom:none; }
+  .ob-check { width:16px;height:16px;cursor:pointer;accent-color:var(--accent);flex-shrink:0; }
+  .ob-label { font-size:13.5px; }
+  .ob-label.done { text-decoration:line-through;color:var(--text-muted); }
+  /* Priority */
+  .prio-dot { width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;flex-shrink:0; }
+  .prio-dot.urgent,.prio-tag.urgent { background:var(--critical-bg);color:var(--critical); }
+  .prio-dot.high,.prio-tag.high { background:var(--warning-bg);color:var(--warning); }
+  .prio-dot.normal { background:var(--gridline);color:var(--text-muted); }
+  .prio-tag { font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;white-space:nowrap; }
+  /* Deadlines widget */
+  .dl-widget { background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:20px; }
+  .dl-widget-title { font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px; }
+  .dl-chips { display:flex;flex-wrap:wrap;gap:7px; }
+  .dl-chip { display:inline-flex;align-items:center;gap:6px;border-radius:7px;padding:5px 10px;font-size:12.5px;border:1px solid var(--border);background:var(--page); }
+  .dl-chip.overdue { border-color:var(--critical);background:var(--critical-bg);color:var(--critical); }
+  .dl-chip.today { border-color:var(--warning);background:var(--warning-bg);color:var(--warning); }
+  .dl-chip.soon { border-color:var(--gridline); }
+  /* Scratchpad */
+  .scratch-fab { position:fixed;bottom:24px;right:24px;width:46px;height:46px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:19px;box-shadow:0 4px 14px rgba(0,0,0,.22);z-index:150;display:flex;align-items:center;justify-content:center;transition:transform .15s; }
+  .scratch-fab:hover { transform:scale(1.1); }
+  .scratch-panel { position:fixed;bottom:80px;right:24px;width:320px;background:var(--surface-1);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.15);z-index:149;display:none;flex-direction:column; }
+  .scratch-panel.open { display:flex; }
+  .scratch-head { padding:10px 14px;border-bottom:1px solid var(--gridline);font-size:12px;font-weight:600;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center; }
+  .scratch-ta { width:100%;padding:12px 14px;resize:none;border:none;background:transparent;color:var(--text-primary);font-size:13.5px;font-family:inherit;line-height:1.6;min-height:160px;outline:none; }
+  /* Global search */
+  .gs-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-start;justify-content:center;padding-top:72px; }
+  .gs-overlay.open { display:flex; }
+  .gs-box { background:var(--surface-1);border-radius:14px;width:min(600px,96vw);box-shadow:0 16px 48px rgba(0,0,0,.25);overflow:hidden; }
+  .gs-input { width:100%;padding:16px 20px;border:none;background:transparent;font-size:16px;color:var(--text-primary);outline:none;font-family:inherit; }
+  .gs-results { max-height:400px;overflow-y:auto;border-top:1px solid var(--gridline); }
+  .gs-label { padding:8px 20px 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted); }
+  .gs-item { padding:9px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13.5px; }
+  .gs-item:hover { background:var(--accent-bg); }
+  .gs-sub { font-size:11.5px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .gs-empty { padding:32px;text-align:center;color:var(--text-muted);font-size:14px; }
+  /* Quick add */
+  .qadd-wrap { position:relative; }
+  .qadd-drop { position:absolute;top:calc(100% + 6px);right:0;background:var(--surface-1);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;min-width:170px;z-index:120;display:none; }
+  .qadd-drop.open { display:block; }
+  .qadd-item { padding:9px 14px;border-radius:6px;cursor:pointer;font-size:13.5px;display:flex;align-items:center;gap:10px; }
+  .qadd-item:hover { background:var(--accent-bg);color:var(--accent); }
+  .nav-actions { margin-left:auto;display:flex;align-items:center;gap:8px; }
+
 </style>
 </head>
 <body>
@@ -232,13 +311,27 @@
   <button class="nav-tab" data-tab="projects">Проекты</button>
   <button class="nav-tab" data-tab="planning">Планирование</button>
   <button class="nav-tab" data-tab="tools">Инструменты</button>
+  <button class="nav-tab" data-tab="team">Команда</button>
   <button class="nav-tab" data-tab="docs">Регламенты</button>
-  <span class="nav-right"><span class="dot"></span><span id="live-label">localStorage</span></span>
+  <div class="nav-actions">
+    <button onclick="openGS()" title="Поиск" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:15px;padding:4px 8px;border-radius:6px;transition:color .15s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">🔍</button>
+    <div class="qadd-wrap">
+      <button onclick="toggleQAdd(event)" id="qadd-btn" style="background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:19px;padding:1px 11px;border-radius:7px;font-weight:600;line-height:1.6">+</button>
+      <div class="qadd-drop" id="qadd-drop">
+        <div class="qadd-item" onclick="qaTask()">📋 Задача</div>
+        <div class="qadd-item" onclick="qaProject()">🗂 Проект</div>
+        <div class="qadd-item" onclick="qaDoc()">📄 Документ</div>
+        <div class="qadd-item" onclick="qaScratch()">✏️ Заметка</div>
+      </div>
+    </div>
+    <span class="dot"></span><span style="font-size:12px;color:var(--text-muted)" id="live-label">localStorage</span>
+  </div>
 </nav>
 
 <!-- AGENTS -->
 <div class="page active" id="tab-agents">
   <div style="padding:28px 28px 60px;max-width:1280px;margin:0 auto">
+    <div id="dl-widget" class="dl-widget" style="display:none"><div class="dl-widget-title">⏰ Ближайшие дедлайны (7 дней)</div><div class="dl-chips" id="dl-chips"></div></div>
     <div class="stats">
       <div class="stat"><div class="num" id="s-p">–</div><div class="label">проектов</div></div>
       <div class="stat"><div class="num" id="s-s">–</div><div class="label">сессий/агентов</div></div>
@@ -319,12 +412,109 @@
     <div class="docs-header">
       <h2 id="doc-title" style="flex:1;font-size:17px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary)"></h2>
       <span id="doc-saved" style="font-size:11px;color:var(--good);display:none">✓ Сохранено</span>
+      <button class="btn btn-g" id="doc-rule-btn" onclick="openRuleModal()" style="display:none">+ Правило</button>
       <button class="btn btn-g" id="doc-edit-btn" onclick="toggleDocEdit()" style="display:none">Редактировать</button>
       <button class="btn btn-d" id="doc-del-btn" onclick="deleteDoc()" style="display:none">Удалить</button>
     </div>
     <div class="docs-body">
       <div id="doc-view" class="doc-view"><p class="md-empty">Выберите документ из списка слева</p></div>
       <textarea id="doc-editor" class="doc-editor" style="display:none" oninput="autoSaveDoc()" placeholder="Начните писать…"></textarea>
+    </div>
+  </div>
+</div>
+
+
+<!-- TEAM -->
+<div class="page" id="tab-team">
+  <div style="padding:28px 28px 60px;max-width:1280px;margin:0 auto">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <div style="flex:1"><h2 style="font-size:15px;font-weight:600;margin:0 0 2px">Команда</h2><p style="font-size:12.5px;color:var(--text-muted);margin:0">Менеджеры, ИПР, журнал 1-on-1, онбординг</p></div>
+      <button class="btn btn-p" onclick="openMgrModal(null)">+ Менеджер</button>
+    </div>
+    <div class="team-grid" id="team-grid"></div>
+  </div>
+</div>
+
+<!-- MANAGER SIDE-PANEL -->
+<div class="mgr-mo" id="mgr-mo" onclick="if(event.target===this)closeMgr()">
+  <div class="mgr-panel">
+    <div class="mgr-header">
+      <div class="team-avatar" id="mgr-av">?</div>
+      <div style="flex:1">
+        <input id="mgr-name" type="text" placeholder="Имя менеджера" style="font-size:16px;font-weight:600;border:none;background:transparent;color:var(--text-primary);outline:none;width:100%">
+        <input id="mgr-role" type="text" placeholder="Должность (хантер, специалист…)" style="font-size:12px;border:none;background:transparent;color:var(--text-muted);outline:none;width:100%;margin-top:2px">
+      </div>
+      <select id="mgr-status" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;background:var(--page);color:var(--text-primary);font-size:12px">
+        <option value="ok">🟢 В норме</option>
+        <option value="watch">🟡 Следить</option>
+        <option value="problem">🔴 Проблема</option>
+      </select>
+      <button onclick="saveMgr()" class="btn btn-p" style="margin-left:8px">Сохранить</button>
+      <button onclick="closeMgr()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:20px;padding:0 4px;margin-left:4px">×</button>
+    </div>
+    <div style="padding:10px 22px;border-bottom:1px solid var(--gridline);display:flex;gap:12px">
+      <div style="flex:1"><label style="font-size:11px;color:var(--text-muted)">ПЛАН (тг)</label><input id="mgr-plan" type="number" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;background:var(--page);color:var(--text-primary);font-size:14px;font-weight:600;margin-top:3px"></div>
+      <div style="flex:1"><label style="font-size:11px;color:var(--text-muted)">ФАКТ (тг)</label><input id="mgr-fact" type="number" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;background:var(--page);color:var(--text-primary);font-size:14px;font-weight:600;margin-top:3px"></div>
+      <div style="flex:1"><label style="font-size:11px;color:var(--text-muted)">ТЕЛЕФОН</label><input id="mgr-phone" type="text" placeholder="+7…" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;background:var(--page);color:var(--text-primary);font-size:13px;margin-top:3px"></div>
+    </div>
+    <div class="mgr-tabs" id="mgr-tabs">
+      <button class="mgr-tab-btn active" onclick="switchMgrTab('ipr',this)">ИПР</button>
+      <button class="mgr-tab-btn" onclick="switchMgrTab('meetings',this)">Журнал 1-on-1</button>
+      <button class="mgr-tab-btn" onclick="switchMgrTab('onboarding',this)">Онбординг</button>
+    </div>
+    <div class="mgr-body">
+      <!-- IPR -->
+      <div id="mgr-ipr">
+        <button class="btn btn-g" onclick="addIpr()" style="margin-bottom:12px">+ Добавить цель</button>
+        <div id="ipr-list"></div>
+      </div>
+      <!-- Meetings -->
+      <div id="mgr-meetings" style="display:none">
+        <button class="btn btn-g" onclick="addMeeting()" style="margin-bottom:12px">+ Добавить встречу</button>
+        <div id="meeting-list"></div>
+      </div>
+      <!-- Onboarding -->
+      <div id="mgr-onboarding" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button class="btn btn-g" onclick="addObItem()">+ Шаг</button>
+          <button class="btn btn-g" onclick="loadObTemplate()">📋 Загрузить шаблон</button>
+        </div>
+        <div id="ob-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCRATCHPAD -->
+<button class="scratch-fab" id="scratch-fab" onclick="toggleScratch()" title="Быстрая заметка">✏️</button>
+<div class="scratch-panel" id="scratch-panel">
+  <div class="scratch-head">
+    <span>✏️ Быстрые заметки</span>
+    <button onclick="toggleScratch()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px">×</button>
+  </div>
+  <textarea class="scratch-ta" id="scratch-ta" placeholder="Запиши мысль…" oninput="saveScratch()"></textarea>
+</div>
+
+<!-- GLOBAL SEARCH -->
+<div class="gs-overlay" id="gs-overlay" onclick="if(event.target===this)closeGS()">
+  <div class="gs-box">
+    <input class="gs-input" id="gs-input" type="text" placeholder="Поиск по всему дашборду…" oninput="runGS(this.value)">
+    <div class="gs-results" id="gs-results"><div class="gs-empty">Начни вводить запрос</div></div>
+  </div>
+</div>
+
+<!-- ADD RULE MODAL -->
+<div class="mo hidden" id="rule-mo">
+  <div class="modal">
+    <h3>Добавить правило</h3>
+    <div><label class="fl">Правило</label><textarea id="rule-text" rows="3" placeholder="Текст правила…"></textarea></div>
+    <div class="mg" style="margin-top:8px">
+      <div><label class="fl">Раздел (заголовок ## в документе)</label><input id="rule-section" type="text" placeholder="Например: Оплата и счета"></div>
+      <div><label class="fl">Дата</label><input id="rule-date" type="date"></div>
+    </div>
+    <div class="ma">
+      <button class="btn btn-g" onclick="closeRuleModal()">Отмена</button>
+      <button class="btn btn-p" onclick="saveRule()">Добавить</button>
     </div>
   </div>
 </div>
@@ -367,6 +557,19 @@
       <div><label class="fl">Дедлайн</label><input id="m-dl" type="date"></div>
       <div><label class="fl">Колонка</label><select id="m-col"></select></div>
     </div>
+    <div class="mg" style="margin-top:10px">
+      <div><label class="fl">Приоритет</label>
+        <select id="m-prio">
+          <option value="normal">⚪ Обычный</option>
+          <option value="high">🟡 Высокий</option>
+          <option value="urgent">🔴 Срочный</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding-top:22px">
+        <input type="checkbox" id="m-rec" style="accent-color:var(--accent);width:16px;height:16px">
+        <label for="m-rec" style="font-size:13px;cursor:pointer">Ежемесячная задача</label>
+      </div>
+    </div>
     <div class="ma">
       <button class="btn btn-d" id="m-del" style="display:none">Удалить</button>
       <button class="btn btn-g" id="m-cancel">Отмена</button>
@@ -397,6 +600,8 @@ function defaultData() {
   return {
     projects: [],
     docs: [],
+    team: [],
+    scratchpad: '',
     plan: {
       months: {
         '2026-09': { cols: [{id:'c1',name:'ЕНТ'},{id:'c2',name:'Маркетинг'},{id:'c3',name:'Конкуренты'},{id:'c4',name:'Мероприятия'}], tasks: [] },
@@ -577,10 +782,13 @@ function renderBoard(){
 function taskCardHtml(t){
   const isDone=!!t.done;
   const dl=t.deadline?formatDate(t.deadline,isDone):"";
+  const prio=t.priority||'normal';
+  const prioDot=prio!=='normal'?`<span class="prio-dot ${prio}" title="${prio==='urgent'?'Срочный':'Высокий'}"></span>`:'';
+  const recTag=t.recurring?'<span style="font-size:10px;color:var(--text-muted)" title="Ежемесячная">🔁</span>':'';
   return`<div class="task-card" onclick="openTaskModal('${esc(t.id)}','${esc(t._month)}')">
     <div class="task-check${isDone?" done":""}" onclick="event.stopPropagation();toggleTask('${esc(t.id)}','${esc(t._month)}')"></div>
     <div class="task-body">
-      <div class="task-name${isDone?" done-text":""}">${esc(t.name)}</div>
+      <div class="task-name${isDone?" done-text":""}"> ${prioDot}${esc(t.name)} ${recTag}</div>
       ${dl}
     </div>
   </div>`;
@@ -662,9 +870,13 @@ function openTaskModal(id,month){
   document.getElementById("m-n").value=t.name||"";
   document.getElementById("m-d").value=t.note||"";
   document.getElementById("m-dl").value=t.deadline||"";
+  document.getElementById("m-prio").value=t.priority||"normal";
+  document.getElementById("m-rec").checked=!!t.recurring;
   // Col select
   const cols=DATA.plan.months[month]?.cols||[];
   document.getElementById("m-col").innerHTML=cols.map(c=>`<option value="${esc(c.id)}"${t.col===c.id?" selected":""}>${esc(c.name)}</option>`).join("");
+  document.getElementById("m-prio").value=t.priority||"normal";
+  document.getElementById("m-rec").checked=!!t.recurring;
   document.getElementById("m-del").style.display="block";
   document.getElementById("mo").classList.remove("hidden");
 }
@@ -681,6 +893,8 @@ document.getElementById("m-save").addEventListener("click",()=>{
   t.note=document.getElementById("m-d").value;
   t.deadline=document.getElementById("m-dl").value;
   t.col=document.getElementById("m-col").value;
+  t.priority=document.getElementById("m-prio").value||"normal";
+  t.recurring=document.getElementById("m-rec").checked;
   save(); renderBoard(); renderSidebar(); closeModal();
 });
 
@@ -1392,6 +1606,465 @@ if (DATA.docs.length > 0) openDoc(DATA.docs[0].id);
   renderDocList();
   openDoc(DATA.docs[0].id);
 })();
+
+
+// ── Deadlines widget ──────────────────────────────────────────
+function renderDeadlines() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const in7 = new Date(today); in7.setDate(in7.getDate()+7);
+  const items = [];
+  Object.entries(DATA.plan?.months||{}).forEach(([mk,md]) => {
+    (md.tasks||[]).filter(t => !t.done && t.deadline).forEach(t => {
+      const d = new Date(t.deadline+'T00:00:00');
+      if (d <= in7) items.push({name:t.name, date:t.deadline, d, overdue:d<today, today:d.getTime()===today.getTime()});
+    });
+  });
+  items.sort((a,b) => a.d-b.d);
+  const w = document.getElementById('dl-widget');
+  if (!items.length) { w.style.display='none'; return; }
+  w.style.display='block';
+  const fmt = d => new Date(d+'T00:00:00').toLocaleDateString('ru',{day:'numeric',month:'short'});
+  document.getElementById('dl-chips').innerHTML = items.map(i =>
+    `<span class="dl-chip ${i.overdue?'overdue':i.today?'today':'soon'}">
+      <span>${i.overdue?'🔴':i.today?'🟡':'⏰'}</span>
+      <span class="dl-chip-name">${esc(i.name)}</span>
+      <span style="font-size:11px;opacity:.7">${fmt(i.date)}</span>
+    </span>`
+  ).join('');
+}
+
+// ── Team tab ──────────────────────────────────────────────────
+let _mgrId = null;
+
+function renderTeam() {
+  const grid = document.getElementById('team-grid');
+  const team = DATA.team || [];
+  if (!team.length) {
+    grid.innerHTML = '<div style="color:var(--text-muted);font-size:14px;padding:40px 0;grid-column:1/-1">Нажми «+ Менеджер» чтобы добавить первого</div>';
+    return;
+  }
+  grid.innerHTML = team.map(m => {
+    const initials = (m.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const pct = m.plan>0 ? Math.round(m.fact/m.plan*100) : 0;
+    const factColor = pct>=100?'var(--good)':pct>=70?'var(--warning)':'var(--critical)';
+    const d1on1 = m.lastOneOnOne ? new Date(m.lastOneOnOne).toLocaleDateString('ru',{day:'numeric',month:'short'}) : 'не было';
+    return `<div class="team-card" onclick="openMgrModal('${esc(m.id)}')">
+      <div class="team-card-head">
+        <div class="team-avatar">${initials}</div>
+        <div>
+          <div class="team-name">${esc(m.name||'Без имени')}</div>
+          <div class="team-role">${esc(m.role||'')}</div>
+        </div>
+        <span class="ts ${m.status||'ok'}" style="margin-left:auto" title="${m.status==='ok'?'В норме':m.status==='watch'?'Следить':'Проблема'}"></span>
+      </div>
+      <div class="team-kpi">
+        <div class="team-kpi-item"><div class="team-kpi-val">${(m.plan||0).toLocaleString('ru')}</div><div class="team-kpi-label">план</div></div>
+        <div class="team-kpi-item"><div class="team-kpi-val" style="color:${factColor}">${(m.fact||0).toLocaleString('ru')}</div><div class="team-kpi-label">факт (${pct}%)</div></div>
+      </div>
+      <div class="team-meta">
+        <span>📅 1-on-1: ${d1on1}</span>
+        <span>·</span>
+        <span>ИПР: ${(m.ipr||[]).filter(i=>i.done).length}/${(m.ipr||[]).length}</span>
+        <span>·</span>
+        <span>Онб: ${(m.onboarding||[]).filter(o=>o.done).length}/${(m.onboarding||[]).length}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openMgrModal(id) {
+  if (!DATA.team) DATA.team = [];
+  let mgr;
+  if (id) {
+    mgr = DATA.team.find(m => m.id === id);
+    if (!mgr) return;
+    _mgrId = id;
+  } else {
+    mgr = {id:uid(),name:'',role:'',phone:'',plan:0,fact:0,status:'ok',lastOneOnOne:null,ipr:[],meetings:[],onboarding:[]};
+    DATA.team.push(mgr);
+    save();
+    _mgrId = mgr.id;
+  }
+  document.getElementById('mgr-name').value = mgr.name||'';
+  document.getElementById('mgr-role').value = mgr.role||'';
+  document.getElementById('mgr-phone').value = mgr.phone||'';
+  document.getElementById('mgr-plan').value = mgr.plan||'';
+  document.getElementById('mgr-fact').value = mgr.fact||'';
+  document.getElementById('mgr-status').value = mgr.status||'ok';
+  updateMgrAvatar();
+  switchMgrTab('ipr', document.querySelector('.mgr-tab-btn'));
+  document.getElementById('mgr-mo').classList.add('open');
+  renderIpr();
+  renderMeetings();
+  renderOnboarding();
+}
+
+function updateMgrAvatar() {
+  const name = document.getElementById('mgr-name').value;
+  const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || '?';
+  document.getElementById('mgr-av').textContent = initials;
+}
+document.getElementById('mgr-name').addEventListener('input', updateMgrAvatar);
+
+function saveMgr() {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  mgr.name = document.getElementById('mgr-name').value;
+  mgr.role = document.getElementById('mgr-role').value;
+  mgr.phone = document.getElementById('mgr-phone').value;
+  mgr.plan = parseFloat(document.getElementById('mgr-plan').value)||0;
+  mgr.fact = parseFloat(document.getElementById('mgr-fact').value)||0;
+  mgr.status = document.getElementById('mgr-status').value;
+  save(); renderTeam();
+  document.getElementById('mgr-mo').classList.remove('open');
+}
+
+function closeMgr() {
+  saveMgr();
+}
+
+function switchMgrTab(tab, btn) {
+  document.querySelectorAll('.mgr-tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('mgr-ipr').style.display = tab==='ipr' ? '' : 'none';
+  document.getElementById('mgr-meetings').style.display = tab==='meetings' ? '' : 'none';
+  document.getElementById('mgr-onboarding').style.display = tab==='onboarding' ? '' : 'none';
+}
+
+// IPR
+function renderIpr() {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  const list = document.getElementById('ipr-list');
+  if (!mgr||!(mgr.ipr||[]).length) { list.innerHTML='<p style="color:var(--text-muted);font-size:13px">Нет целей. Нажми «+ Добавить цель»</p>'; return; }
+  list.innerHTML = mgr.ipr.map(item => `
+    <div class="ipr-item">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="flex:1;font-size:13.5px;font-weight:${item.done?'400':'600'};${item.done?'text-decoration:line-through;color:var(--text-muted)':''}">${esc(item.goal)}</span>
+        <span style="font-size:12px;color:var(--text-muted)">${item.progress||0}%</span>
+        <input type="range" min="0" max="100" value="${item.progress||0}" style="width:80px" oninput="updateIprProgress('${item.id}',this.value)">
+        <button onclick="deleteIpr('${item.id}')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px">×</button>
+      </div>
+      ${item.deadline ? `<div style="font-size:11px;color:var(--text-muted)">Срок: ${item.deadline}</div>` : ''}
+      <div class="ipr-bar-wrap"><div class="ipr-bar" style="width:${item.progress||0}%"></div></div>
+    </div>`
+  ).join('');
+}
+
+function addIpr() {
+  const goal = prompt('Цель ИПР:');
+  if (!goal) return;
+  const dl = prompt('Срок (YYYY-MM-DD, или пусто):');
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  if (!mgr.ipr) mgr.ipr = [];
+  mgr.ipr.push({id:uid(), goal, deadline:dl||'', progress:0, done:false});
+  save(); renderIpr(); renderTeam();
+}
+
+function updateIprProgress(iprId, val) {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  const item = (mgr.ipr||[]).find(i => i.id === iprId);
+  if (item) { item.progress = parseInt(val); item.done = item.progress >= 100; save(); renderTeam(); }
+}
+
+function deleteIpr(iprId) {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  mgr.ipr = (mgr.ipr||[]).filter(i => i.id !== iprId);
+  save(); renderIpr(); renderTeam();
+}
+
+// Meetings (1-on-1 journal)
+function renderMeetings() {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  const list = document.getElementById('meeting-list');
+  if (!mgr||!(mgr.meetings||[]).length) { list.innerHTML='<p style="color:var(--text-muted);font-size:13px">Журнал пуст. Нажми «+ Добавить встречу»</p>'; return; }
+  const sorted = [...(mgr.meetings||[])].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  list.innerHTML = sorted.map(m => `
+    <div class="meeting-item">
+      <div class="meeting-date">${m.date||''} · ${m.duration||'1 ч'}</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(m.discussed||'')}</div>
+      ${m.agreed ? `<div style="font-size:12.5px;color:var(--text-secondary)">✅ ${esc(m.agreed)}</div>` : ''}
+      ${m.deadline ? `<div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">Срок: ${m.deadline}</div>` : ''}
+      <button onclick="deleteMeeting('${m.id}')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;margin-top:4px">Удалить</button>
+    </div>`
+  ).join('');
+}
+
+function addMeeting() {
+  const date = prompt('Дата встречи (YYYY-MM-DD):') || new Date().toISOString().slice(0,10);
+  const discussed = prompt('Что обсудили:');
+  if (!discussed) return;
+  const agreed = prompt('Договорились (или пусто):');
+  const deadline = prompt('Дедлайн договорённости (YYYY-MM-DD, или пусто):');
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  if (!mgr.meetings) mgr.meetings = [];
+  mgr.meetings.push({id:uid(), date, discussed, agreed:agreed||'', deadline:deadline||''});
+  mgr.lastOneOnOne = date;
+  save(); renderMeetings(); renderTeam();
+}
+
+function deleteMeeting(mid) {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  mgr.meetings = (mgr.meetings||[]).filter(m => m.id !== mid);
+  save(); renderMeetings();
+}
+
+// Onboarding
+const OB_TEMPLATE = [
+  'Подписан трудовой договор',
+  'Выданы доступы: AmoCRM, Telegram-группы, таблицы',
+  'Проведена экскурсия по офису и знакомство с командой',
+  'Изучен скрипт консультации (НИШ + ЕНТ)',
+  'Изучены этапы воронки AmoCRM',
+  'Проведена первая встреча в паре с руководителем',
+  'Самостоятельно проведена первая консультация',
+  'Изучены регламенты ОП',
+  'Первая регулярка прошла успешно',
+  'Выполнен план первого месяца (частично)',
+];
+
+function renderOnboarding() {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  const list = document.getElementById('ob-list');
+  if (!mgr||!(mgr.onboarding||[]).length) { list.innerHTML='<p style="color:var(--text-muted);font-size:13px">Нет шагов. Загрузи шаблон или добавь вручную</p>'; return; }
+  list.innerHTML = mgr.onboarding.map(o => `
+    <div class="ob-item">
+      <input type="checkbox" class="ob-check" ${o.done?'checked':''} onchange="toggleOb('${o.id}',this.checked)">
+      <span class="ob-label ${o.done?'done':''}">${esc(o.text)}</span>
+      <button onclick="deleteOb('${o.id}')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:15px;margin-left:auto">×</button>
+    </div>`
+  ).join('');
+}
+
+function addObItem() {
+  const text = prompt('Шаг онбординга:');
+  if (!text) return;
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  if (!mgr.onboarding) mgr.onboarding = [];
+  mgr.onboarding.push({id:uid(), text, done:false});
+  save(); renderOnboarding(); renderTeam();
+}
+
+function loadObTemplate() {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  if (!mgr.onboarding) mgr.onboarding = [];
+  OB_TEMPLATE.forEach(text => {
+    if (!mgr.onboarding.some(o => o.text === text))
+      mgr.onboarding.push({id:uid(), text, done:false});
+  });
+  save(); renderOnboarding(); renderTeam();
+}
+
+function toggleOb(obId, val) {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  const o = (mgr.onboarding||[]).find(o => o.id === obId);
+  if (o) { o.done = val; save(); renderTeam(); }
+}
+
+function deleteOb(obId) {
+  const mgr = DATA.team.find(m => m.id === _mgrId);
+  if (!mgr) return;
+  mgr.onboarding = (mgr.onboarding||[]).filter(o => o.id !== obId);
+  save(); renderOnboarding();
+}
+
+// ── Scratchpad ─────────────────────────────────────────────────
+function toggleScratch() {
+  const p = document.getElementById('scratch-panel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) {
+    const ta = document.getElementById('scratch-ta');
+    ta.value = DATA.scratchpad || '';
+    ta.focus();
+  }
+}
+function saveScratch() {
+  DATA.scratchpad = document.getElementById('scratch-ta').value;
+  save();
+}
+function qaScratch() {
+  closeQAdd();
+  toggleScratch();
+}
+
+// ── Global search ──────────────────────────────────────────────
+function openGS() {
+  document.getElementById('gs-overlay').classList.add('open');
+  const inp = document.getElementById('gs-input');
+  inp.value = '';
+  document.getElementById('gs-results').innerHTML = '<div class="gs-empty">Начни вводить запрос</div>';
+  inp.focus();
+}
+function closeGS() { document.getElementById('gs-overlay').classList.remove('open'); }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeGS(); closeQAdd(); document.getElementById('scratch-panel').classList.remove('open'); }
+  if ((e.metaKey||e.ctrlKey) && e.key === 'k') { e.preventDefault(); openGS(); }
+});
+
+function runGS(q) {
+  const res = document.getElementById('gs-results');
+  if (!q.trim()) { res.innerHTML = '<div class="gs-empty">Начни вводить запрос</div>'; return; }
+  const lq = q.toLowerCase();
+  let html = '';
+  // Tasks
+  const tasks = [];
+  Object.entries(DATA.plan?.months||{}).forEach(([mk,md]) => {
+    (md.tasks||[]).filter(t => !t.done && t.name.toLowerCase().includes(lq)).forEach(t => tasks.push({name:t.name,sub:mk,action:`switchToPlanning('${mk}')`}));
+  });
+  if (tasks.length) {
+    html += `<div class="gs-label">📋 Задачи</div>` + tasks.slice(0,5).map(r =>
+      `<div class="gs-item" onclick="closeGS();${r.action}"><span class="gs-icon">📋</span><div><div>${esc(r.name)}</div><div class="gs-sub">${r.sub}</div></div></div>`).join('');
+  }
+  // Docs
+  const docs = (DATA.docs||[]).filter(d => d.title.toLowerCase().includes(lq) || d.content.toLowerCase().includes(lq));
+  if (docs.length) {
+    html += `<div class="gs-label">📄 Регламенты</div>` + docs.slice(0,4).map(d => {
+      const idx = d.content.toLowerCase().indexOf(lq);
+      const snip = idx>=0 ? d.content.slice(Math.max(0,idx-20),idx+50).replace(/\n/g,' ') : '';
+      return `<div class="gs-item" onclick="closeGS();switchToDoc('${d.id}')"><span class="gs-icon">📄</span><div><div>${esc(d.title)}</div><div class="gs-sub">${esc(snip)}</div></div></div>`;
+    }).join('');
+  }
+  // Projects
+  const projs = (DATA.projects||[]).filter(p => (p.title||'').toLowerCase().includes(lq) || (p.desc||'').toLowerCase().includes(lq));
+  if (projs.length) {
+    html += `<div class="gs-label">🗂 Проекты</div>` + projs.slice(0,4).map(p =>
+      `<div class="gs-item" onclick="closeGS();switchTab('projects')"><span class="gs-icon">🗂</span><div><div>${esc(p.title)}</div><div class="gs-sub">${esc(p.desc||'')}</div></div></div>`).join('');
+  }
+  // Tools
+  const tools = [...(DATA.tools||[])].filter(t => (t.name||'').toLowerCase().includes(lq));
+  if (tools.length) {
+    html += `<div class="gs-label">🔗 Инструменты</div>` + tools.slice(0,4).map(t =>
+      `<div class="gs-item" onclick="window.open('${t.url||'#'}','_blank');closeGS()"><span class="gs-icon">${t.icon||'🔗'}</span><div><div>${esc(t.name)}</div><div class="gs-sub">${esc(t.url||'')}</div></div></div>`).join('');
+  }
+  // Team
+  const members = (DATA.team||[]).filter(m => (m.name||'').toLowerCase().includes(lq) || (m.role||'').toLowerCase().includes(lq));
+  if (members.length) {
+    html += `<div class="gs-label">👥 Команда</div>` + members.slice(0,3).map(m =>
+      `<div class="gs-item" onclick="closeGS();switchTab('team');openMgrModal('${m.id}')"><span class="gs-icon">👤</span><div><div>${esc(m.name)}</div><div class="gs-sub">${esc(m.role||'')}</div></div></div>`).join('');
+  }
+  res.innerHTML = html || '<div class="gs-empty">Ничего не найдено</div>';
+}
+
+function switchToPlanning(mk) {
+  switchTab('planning');
+  setTimeout(() => {
+    const item = document.querySelector(`.sidebar-item[data-month="${mk}"]`);
+    if (item) item.click();
+  }, 50);
+}
+
+function switchToDoc(id) {
+  switchTab('docs');
+  setTimeout(() => openDoc(id), 50);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const btn = document.querySelector(`.nav-tab[data-tab="${tab}"]`);
+  if (btn) btn.classList.add('active');
+  const page = document.getElementById('tab-'+tab);
+  if (page) page.classList.add('active');
+}
+
+// ── Quick add ──────────────────────────────────────────────────
+function toggleQAdd(e) {
+  e.stopPropagation();
+  document.getElementById('qadd-drop').classList.toggle('open');
+}
+function closeQAdd() { document.getElementById('qadd-drop').classList.remove('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('.qadd-wrap')) closeQAdd(); });
+
+function qaTask() {
+  closeQAdd();
+  switchTab('planning');
+  setTimeout(() => document.querySelector('#add-col-header-btn')?.click(), 80);
+}
+function qaProject() {
+  closeQAdd();
+  switchTab('projects');
+  setTimeout(() => document.getElementById('add-proj-btn')?.click(), 80);
+}
+function qaDoc() {
+  closeQAdd();
+  switchTab('docs');
+  setTimeout(() => newDoc(), 80);
+}
+
+// ── Add rule to doc ────────────────────────────────────────────
+function openRuleModal() {
+  if (!_docId) return;
+  document.getElementById('rule-text').value = '';
+  document.getElementById('rule-section').value = '';
+  document.getElementById('rule-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('rule-mo').classList.remove('hidden');
+}
+function closeRuleModal() { document.getElementById('rule-mo').classList.add('hidden'); }
+
+function saveRule() {
+  const text = document.getElementById('rule-text').value.trim();
+  if (!text) return;
+  const section = document.getElementById('rule-section').value.trim();
+  const date = document.getElementById('rule-date').value;
+  const doc = (DATA.docs||[]).find(d => d.id === _docId);
+  if (!doc) return;
+  const entry = `\n- **[${date}]** ${text}`;
+  if (section) {
+    const marker = `## ${section}`;
+    if (doc.content.includes(marker)) {
+      const idx = doc.content.indexOf(marker);
+      const nextSection = doc.content.indexOf('\n## ', idx+1);
+      const insertAt = nextSection >= 0 ? nextSection : doc.content.length;
+      doc.content = doc.content.slice(0,insertAt) + entry + doc.content.slice(insertAt);
+    } else {
+      doc.content += `\n\n## ${section}${entry}`;
+    }
+  } else {
+    doc.content += entry;
+  }
+  doc.updated = Date.now();
+  save();
+  document.getElementById('doc-view').innerHTML = mdRender(doc.content);
+  document.getElementById('doc-editor').value = doc.content;
+  closeRuleModal();
+}
+
+// ── Recurring tasks: auto-create for current month ─────────────
+(function checkRecurring() {
+  const mk = CUR_MONTH;
+  if (!DATA.plan.months[mk]) DATA.plan.months[mk] = {cols:[{id:'c1',name:'ЕНТ'},{id:'c2',name:'Маркетинг'},{id:'c3',name:'Конкуренты'},{id:'c4',name:'Мероприятия'}], tasks:[]};
+  const md = DATA.plan.months[mk];
+  let changed = false;
+  Object.entries(DATA.plan.months).forEach(([pmk, pmd]) => {
+    if (pmk === mk) return;
+    (pmd.tasks||[]).filter(t => t.recurring).forEach(t => {
+      if (!md.tasks.some(et => et.name === t.name && et.recurring)) {
+        const col = md.cols.find(c => c.id === t.col) || md.cols[0];
+        md.tasks.push({id:uid(), name:t.name, col:col?.id||md.cols[0]?.id, done:false, deadline:'', note:'Повторяющаяся задача', priority:t.priority||'normal', recurring:true, created:Date.now()});
+        changed = true;
+      }
+    });
+  });
+  if (changed) save();
+})();
+
+// ── Init new tabs ──────────────────────────────────────────────
+renderTeam();
+renderDeadlines();
+
+// Show rule btn when doc open
+const _origOpenDoc = openDoc;
+openDoc = function(id) {
+  _origOpenDoc(id);
+  document.getElementById('doc-rule-btn').style.display = '';
+};
 
 </script>
 </body>
