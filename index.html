@@ -867,10 +867,24 @@ function renderDocList() {
   docs.forEach(doc => {
     const div = document.createElement('div');
     div.className = 'sidebar-item' + (doc.id === _docId ? ' active' : '');
+    div.style.cssText = 'flex-direction:column;align-items:flex-start;gap:3px';
     const d = doc.updated ? new Date(doc.updated).toLocaleDateString('ru',{day:'2-digit',month:'2-digit'}) : '';
-    div.innerHTML = `<span style="font-size:15px;flex-shrink:0">📄</span>
+    let snippet = '';
+    if (_docFilter) {
+      const idx = doc.content.toLowerCase().indexOf(_docFilter);
+      if (idx >= 0) {
+        const start = Math.max(0, idx - 30);
+        const end = Math.min(doc.content.length, idx + _docFilter.length + 60);
+        const raw = (start > 0 ? '…' : '') + doc.content.slice(start, end).replace(/\n/g,' ') + (end < doc.content.length ? '…' : '');
+        const hi = raw.replace(new RegExp(_docFilter.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi'), m => `<mark style="background:#ffe066;color:#000;border-radius:2px">${m}</mark>`);
+        snippet = `<span style="font-size:11.5px;color:var(--text-muted);line-height:1.4;white-space:normal">${hi}</span>`;
+      }
+    }
+    div.innerHTML = `<div style="display:flex;align-items:center;gap:8px;width:100%">
+      <span style="font-size:15px;flex-shrink:0">📄</span>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${esc(doc.title)}</span>
-      <span class="si-count" style="font-size:11px">${d}</span>`;
+      <span class="si-count" style="font-size:11px;flex-shrink:0">${d}</span>
+    </div>${snippet}`;
     div.onclick = () => openDoc(doc.id);
     el.appendChild(div);
   });
@@ -879,6 +893,28 @@ function renderDocList() {
 function filterDocs(val) {
   _docFilter = val.toLowerCase().trim();
   renderDocList();
+  if (_docFilter && _docId) _highlightDoc();
+  else if (!_docFilter && _docId) {
+    const doc = (DATA.docs||[]).find(d => d.id === _docId);
+    if (doc && !_docEdit) document.getElementById('doc-view').innerHTML = mdRender(doc.content);
+  }
+}
+
+function _highlightDoc() {
+  const view = document.getElementById('doc-view');
+  if (!view || _docEdit) return;
+  const doc = (DATA.docs||[]).find(d => d.id === _docId);
+  if (!doc) return;
+  let html = mdRender(doc.content);
+  if (_docFilter) {
+    const re = new RegExp('(' + _docFilter.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+    html = html.replace(/>([^<]*)</g, (m, text) =>
+      '>' + text.replace(re, '<mark style="background:#ffe066;color:#000;border-radius:2px;padding:0 1px">$1</mark>') + '<'
+    );
+  }
+  view.innerHTML = html;
+  const first = view.querySelector('mark');
+  if (first) first.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 function openDoc(id) {
@@ -895,6 +931,7 @@ function openDoc(id) {
   document.getElementById('doc-del-btn').style.display = '';
   document.getElementById('doc-saved').style.display = 'none';
   renderDocList();
+  if (_docFilter) _highlightDoc();
 }
 
 function toggleDocEdit() {
