@@ -770,6 +770,33 @@ document.getElementById('tm-del').addEventListener('click', ()=>{
 });
 
 renderTools();
+
+// ── Seed October 2026 Мероприятия ─────────────────────────────
+(function seedOctober() {
+  const mk = '2026-10';
+  if (!DATA.plan.months[mk]) {
+    DATA.plan.months[mk] = {
+      cols:[{id:'c1',name:'ЕНТ'},{id:'c2',name:'Маркетинг'},{id:'c3',name:'Конкуренты'},{id:'c4',name:'Мероприятия'}],
+      tasks:[]
+    };
+  }
+  const md = DATA.plan.months[mk];
+  const mCol = md.cols.find(c => c.name === 'Мероприятия');
+  if (!mCol) return;
+  if (md.tasks.some(t => t.col === mCol.id)) return;
+  const events = [
+    {name:'Алматы Марафон', deadline:'2026-09-26'},
+    {name:'Сундет той',     deadline:'2026-10-02'},
+    {name:'Корпоратив',     deadline:'2026-10-03'},
+    {name:'Ташкент с ОП',   deadline:'2026-10-10'},
+    {name:'Турция',         deadline:'2026-10-15'},
+    {name:'Грузия',         deadline:'2026-10-24'},
+  ];
+  for (const e of events) {
+    md.tasks.push({id:uid(), name:e.name, col:mCol.id, done:false, deadline:e.deadline, note:'', created:Date.now()});
+  }
+  save();
+})();
 </script>
 </body>
 </html>
