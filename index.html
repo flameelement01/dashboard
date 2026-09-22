@@ -712,6 +712,7 @@ document.querySelectorAll('.nav-tab').forEach(b => b.addEventListener('click', (
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   b.classList.add('active');
   document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+  localStorage.setItem('dash_tab', b.dataset.tab);
 }));
 
 // ── Storage ────────────────────────────────────────────────────
@@ -2094,6 +2095,7 @@ function switchTab(tab) {
   if (btn) btn.classList.add('active');
   const page = document.getElementById('tab-'+tab);
   if (page) page.classList.add('active');
+  localStorage.setItem('dash_tab', tab);
 }
 
 // ── Quick add ──────────────────────────────────────────────────
@@ -2180,6 +2182,16 @@ function saveRule() {
 // ── Init new tabs ──────────────────────────────────────────────
 renderTeam();
 renderDeadlines();
+
+// ── Restore last active tab ────────────────────────────────────
+(function restoreTab() {
+  const saved = localStorage.getItem('dash_tab');
+  if (saved && document.getElementById('tab-' + saved)) {
+    switchTab(saved);
+    const mb = document.querySelector(`.mn-btn[data-tab="${saved}"]`);
+    if (mb) { document.querySelectorAll('.mn-btn').forEach(b => b.classList.remove('active')); mb.classList.add('active'); }
+  }
+})();
 
 // Show rule btn when doc open
 const _origOpenDoc = openDoc;
