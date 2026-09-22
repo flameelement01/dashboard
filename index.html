@@ -93,6 +93,22 @@
   /* ── Planning tab ── */
   #tab-planning { display: none; height: calc(100vh - 49px); }
   #tab-planning.active { display: flex; }
+  #tab-tools { padding: 28px 28px 60px; max-width: 1280px; margin: 0 auto; }
+  .tools-section { margin-bottom: 32px; }
+  .tools-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 0 0 12px; }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .tool-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; transition: border-color .15s, box-shadow .15s; cursor: pointer; }
+  .tool-card:hover { border-color: var(--accent); box-shadow: 0 2px 12px rgba(42,120,214,0.10); }
+  .tool-card-head { display: flex; align-items: center; gap: 10px; }
+  .tool-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
+  .tool-name { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+  .tool-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.4; }
+  .tool-url { font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+  .tool-card.editable-tool:hover .tool-edit-btn { opacity: 1; }
+  .tool-edit-btn { opacity: 0; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 13px; padding: 2px 6px; border-radius: 4px; margin-left: auto; flex-shrink: 0; transition: opacity .15s; }
+  .tool-edit-btn:hover { color: var(--accent); }
+  .tools-add-btn { display: flex; align-items: center; gap: 10px; background: color-mix(in srgb, var(--text-muted) 7%, transparent); border: 2px dashed var(--gridline); border-radius: 12px; padding: 16px; cursor: pointer; color: var(--text-muted); font: inherit; font-size: 13.5px; transition: border-color .15s, color .15s; text-align: left; width: 100%; }
+  .tools-add-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   /* Sidebar */
   .plan-sidebar {
@@ -191,6 +207,7 @@
   <button class="nav-tab active" data-tab="agents">Conductor агенты</button>
   <button class="nav-tab" data-tab="projects">Проекты</button>
   <button class="nav-tab" data-tab="planning">Планирование</button>
+  <button class="nav-tab" data-tab="tools">Инструменты</button>
   <span class="nav-right"><span class="dot"></span><span id="live-label">localStorage</span></span>
 </nav>
 
@@ -245,6 +262,46 @@
     </div>
     <div class="board-wrap">
       <div class="board" id="board"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Tools -->
+<div class="page" id="tab-tools">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+    <div style="flex:1">
+      <h2 style="font-size:18px;font-weight:700;margin:0 0 2px">Инструменты</h2>
+      <p style="font-size:12.5px;color:var(--text-muted);margin:0">Все рабочие ссылки в одном месте · кликни для открытия</p>
+    </div>
+    <button class="btn btn-p" id="add-tool-btn">+ Добавить ссылку</button>
+  </div>
+  <div id="tools-container"></div>
+</div>
+
+<!-- Tool Modal -->
+<div class="mo hidden" id="tool-mo">
+  <div class="modal">
+    <h3 id="tool-m-title">Добавить инструмент</h3>
+    <div><label class="fl">Название</label><input id="tm-name" type="text" placeholder="Например: Дашборд FlowSales"></div>
+    <div><label class="fl">URL</label><input id="tm-url" type="url" placeholder="https://..."></div>
+    <div><label class="fl">Описание</label><input id="tm-desc" type="text" placeholder="Краткое описание"></div>
+    <div class="mg">
+      <div><label class="fl">Категория</label>
+        <select id="tm-cat">
+          <option value="Аналитика">📊 Аналитика</option>
+          <option value="Телефония">📞 Телефония</option>
+          <option value="Продукты AIplus">🎓 Продукты AIplus</option>
+          <option value="Клиентские">🤝 Клиентские</option>
+          <option value="Conductor">🤖 Conductor</option>
+          <option value="Другое">🔗 Другое</option>
+        </select>
+      </div>
+      <div><label class="fl">Иконка (эмодзи)</label><input id="tm-icon" type="text" placeholder="📊" maxlength="4" style="font-size:20px"></div>
+    </div>
+    <div class="ma">
+      <button class="btn btn-d" id="tm-del" style="display:none">Удалить</button>
+      <button class="btn btn-g" id="tm-cancel">Отмена</button>
+      <button class="btn btn-p" id="tm-save">Сохранить</button>
     </div>
   </div>
 </div>
@@ -627,6 +684,92 @@ _curMonth=CUR_MONTH;
 if(!DATA.plan.months[CUR_MONTH])addMonth();
 renderSidebar();
 renderBoard();
+
+// ── Tools tab ──────────────────────────────────────────────────
+const STATIC_TOOLS = [
+  { id:'t1', name:'FlowSales — Дашборд продаж', url:'https://dash.flowsales-production.kz/', desc:'Рейтинг менеджеров, звонки, оплаты, транзакции, отчёт ОП', cat:'Аналитика', icon:'📊' },
+  { id:'t2', name:'Grafana — Телефония Шымкент', url:'https://109-248-231-123.nip.io/grafana/d/queue-leads-shymkent/22d3b7d?from=now-24h&to=now&timezone=Asia%2FAlmaty&refresh=10s', desc:'Мониторинг телефонии: статусы менеджеров, очередь лидов, обновляется каждые 10с', cat:'Телефония', icon:'📞' },
+  { id:'t3', name:'ROP — Настройки телефонии', url:'https://109-248-231-123.nip.io/rop/', desc:'Управление телефонией: все настройки, маршруты, сценарии', cat:'Телефония', icon:'⚙️' },
+  { id:'t4', name:'test.aiplus.kz — Тесты ЕНТ', url:'https://test.aiplus.kz', desc:'Тесты для 4–11 класса по предметам + короткая профориентация', cat:'Продукты AIplus', icon:'📝' },
+  { id:'t5', name:'ent.aiplus.kz — Профориентация', url:'https://ent.aiplus.kz', desc:'Полноценная профориентация AIplus', cat:'Продукты AIplus', icon:'🎓' },
+  { id:'t6', name:'Презентация для родителей', url:'http://195.49.215.96:8081/', desc:'Слайды для родительских встреч', cat:'Клиентские', icon:'👨‍👩‍👧' },
+  { id:'t7', name:'Онлайн договор', url:'https://dogovor-aiplus.flowsales-production.kz/contracts', desc:'Генерация и подписание договоров с клиентами онлайн', cat:'Клиентские', icon:'📄' },
+  { id:'t8', name:'Мой дашборд', url:'https://flameelement01.github.io/dashboard/', desc:'Conductor агенты, проекты, планирование', cat:'Conductor', icon:'🤖' },
+];
+
+const CAT_ICONS = { 'Аналитика':'📊', 'Телефония':'📞', 'Продукты AIplus':'🎓', 'Клиентские':'🤝', 'Conductor':'🤖', 'Другое':'🔗' };
+let _editToolId = null;
+
+function getTools() { return [...STATIC_TOOLS, ...(DATA.tools||[]).map(t=>({...t,_db:true}))]; }
+
+function renderTools() {
+  const all = getTools();
+  const byCat = {};
+  for (const t of all) (byCat[t.cat]??=[]).push(t);
+  const catOrder = ['Аналитика','Телефония','Продукты AIplus','Клиентские','Conductor','Другое'];
+  const cats = [...new Set([...catOrder, ...Object.keys(byCat)])].filter(c=>byCat[c]);
+  document.getElementById('tools-container').innerHTML = cats.map(cat => {
+    const tools = byCat[cat]||[];
+    const cards = tools.map(t => {
+      const isDb = !!t._db;
+      return `<a class="tool-card${isDb?' editable-tool':''}" href="${esc(t.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+        <div class="tool-card-head">
+          <span class="tool-icon">${esc(t.icon||'🔗')}</span>
+          <span class="tool-name">${esc(t.name)}</span>
+          ${isDb?`<button class="tool-edit-btn" onclick="event.preventDefault();event.stopPropagation();openToolModal('${t.id}')">✎</button>`:''}
+        </div>
+        <div class="tool-desc">${esc(t.desc||'')}</div>
+        <div class="tool-url">${esc(t.url)}</div>
+      </a>`;
+    }).join('');
+    return `<div class="tools-section">
+      <div class="tools-section-title">${CAT_ICONS[cat]||'🔗'} ${esc(cat)}</div>
+      <div class="tools-grid">${cards}</div>
+    </div>`;
+  }).join('') + `<button class="tools-add-btn" id="add-tool-btn2"><span style="font-size:20px">+</span> Добавить ссылку</button>`;
+  document.getElementById('add-tool-btn2')?.addEventListener('click', ()=>openToolModal(null));
+}
+
+function openToolModal(id) {
+  _editToolId = id;
+  const t = id ? (DATA.tools||[]).find(t=>t.id===id) : null;
+  document.getElementById('tool-m-title').textContent = id ? 'Редактировать' : 'Добавить инструмент';
+  document.getElementById('tm-name').value = t?.name||'';
+  document.getElementById('tm-url').value = t?.url||'';
+  document.getElementById('tm-desc').value = t?.desc||'';
+  document.getElementById('tm-cat').value = t?.cat||'Другое';
+  document.getElementById('tm-icon').value = t?.icon||'🔗';
+  document.getElementById('tm-del').style.display = id ? 'block' : 'none';
+  document.getElementById('tool-mo').classList.remove('hidden');
+}
+function closeToolModal() { document.getElementById('tool-mo').classList.add('hidden'); _editToolId=null; }
+
+document.getElementById('add-tool-btn').addEventListener('click', ()=>openToolModal(null));
+document.getElementById('tm-cancel').addEventListener('click', closeToolModal);
+document.getElementById('tool-mo').addEventListener('click', e=>{ if(e.target===document.getElementById('tool-mo'))closeToolModal(); });
+
+document.getElementById('tm-save').addEventListener('click', ()=>{
+  if(!DATA.tools) DATA.tools=[];
+  const item = {
+    id: _editToolId||uid(),
+    name: document.getElementById('tm-name').value,
+    url: document.getElementById('tm-url').value,
+    desc: document.getElementById('tm-desc').value,
+    cat: document.getElementById('tm-cat').value,
+    icon: document.getElementById('tm-icon').value||'🔗',
+  };
+  if(_editToolId) { const i=DATA.tools.findIndex(t=>t.id===_editToolId); if(i>=0)DATA.tools[i]=item; }
+  else DATA.tools.push(item);
+  save(); renderTools(); closeToolModal();
+});
+
+document.getElementById('tm-del').addEventListener('click', ()=>{
+  if(!_editToolId||!confirm('Удалить?'))return;
+  DATA.tools=(DATA.tools||[]).filter(t=>t.id!==_editToolId);
+  save(); renderTools(); closeToolModal();
+});
+
+renderTools();
 </script>
 </body>
 </html>
