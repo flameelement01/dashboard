@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мой дашборд</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7; --text-primary: #0b0b0b;
+    --text-secondary: #52514e; --text-muted: #898781; --gridline: #e1e0d9;
+    --border: rgba(11,11,11,0.10); --accent: #2a78d6;
+    --good: #0ca30c; --warning: #b8790a; --critical: #d03b3b;
+    --good-bg: #e6f5e6; --warning-bg: #fdf1d9; --critical-bg: #fbe4e4; --accent-bg: #e7f0fc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d; --text-primary: #ffffff;
+      --text-secondary: #c3c2b7; --text-muted: #898781; --gridline: #2c2c2a;
+      --border: rgba(255,255,255,0.10); --accent: #3987e5;
+      --good: #0ca30c; --warning: #fab219; --critical: #e66767;
+      --good-bg: #12301f; --warning-bg: #3a2c07; --critical-bg: #3a1414; --accent-bg: #132743;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--page); color: var(--text-primary); }
+
+  /* ── Nav ── */
+  .nav { position: sticky; top: 0; z-index: 100; background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; }
+  .nav-brand { font-weight: 700; font-size: 15px; margin-right: 20px; padding: 15px 0; white-space: nowrap; }
+  .nav-tab { padding: 15px 13px; font-size: 13.5px; cursor: pointer; color: var(--text-muted); border: none; border-bottom: 2px solid transparent; background: none; font: inherit; transition: color .15s; white-space: nowrap; }
+  .nav-tab:hover { color: var(--text-primary); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .nav-right { margin-left: auto; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); flex-shrink: 0; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Shared ── */
+  .status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .status.good { background: var(--good-bg); color: var(--good); }
+  .status.warning { background: var(--warning-bg); color: var(--warning); }
+  .status.critical { background: var(--critical-bg); color: var(--critical); }
+  .status.accent { background: var(--accent-bg); color: var(--accent); }
+  .flag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+  .flag.critical { background: var(--critical-bg); color: var(--critical); }
+  code { background: color-mix(in srgb, var(--text-muted) 14%, transparent); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+  /* ── Agents tab ── */
+  #tab-agents { padding: 28px 28px 60px; max-width: 1280px; margin: 0 auto; }
+  .stats { display: flex; gap: 12px; margin: 0 0 24px; flex-wrap: wrap; }
+  .stat { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; min-width: 120px; }
+  .stat .num { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat .label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .proj-list { display: flex; flex-direction: column; gap: 8px; }
+  .proj-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .proj-card summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .proj-card summary::-webkit-details-marker { display: none; }
+  .proj-card summary:hover { background: color-mix(in srgb, var(--text-muted) 6%, transparent); }
+  .proj-name { font-weight: 600; font-size: 14px; min-width: 120px; }
+  .proj-desc { color: var(--text-secondary); font-size: 12.5px; flex: 1 1 240px; }
+  .proj-date { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+  .proj-count { color: var(--text-muted); font-size: 12px; white-space: nowrap; margin-left: auto; }
+  .session-detail { border-top: 1px solid var(--gridline); overflow-x: auto; }
+  .session-detail table { min-width: 640px; border-collapse: collapse; width: 100%; font-size: 13px; }
+  .session-detail thead th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); font-weight: 600; padding: 8px 14px; border-bottom: 1px solid var(--gridline); }
+  .session-detail td { padding: 8px 14px; color: var(--text-secondary); }
+  .session-detail tr { border-bottom: 1px solid var(--gridline); }
+  .session-detail tr:last-child { border-bottom: none; }
+  .sc { color: var(--text-primary) !important; font-weight: 500; white-space: nowrap; }
+  .cc { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nc { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text-muted) !important; }
+  .legend { margin-top: 14px; font-size: 12px; color: var(--text-muted); display: flex; gap: 16px; flex-wrap: wrap; }
+
+  /* ── Projects tab ── */
+  #tab-projects { padding: 28px 28px 60px; max-width: 1280px; margin: 0 auto; }
+  .pg-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+  .project-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .project-card.editable { cursor: pointer; }
+  .project-card.editable:hover { border-color: var(--accent); }
+  .card-head { display: flex; align-items: flex-start; gap: 8px; }
+  .card-title { font-weight: 600; font-size: 14px; flex: 1; line-height: 1.3; }
+  .card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.45; }
+  .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+  .card-tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--text-muted) 15%, transparent); color: var(--text-secondary); }
+  .card-tag.conductor { background: var(--accent-bg); color: var(--accent); }
+  .card-tag.work { background: #f0e8fc; color: #7c3aed; }
+  .card-date { font-size: 11px; color: var(--text-muted); }
+
+  /* ── Planning tab ── */
+  #tab-planning { display: none; height: calc(100vh - 49px); }
+  #tab-planning.active { display: flex; }
+
+  /* Sidebar */
+  .plan-sidebar {
+    width: 220px; flex-shrink: 0; border-right: 1px solid var(--border);
+    background: var(--surface-1); overflow-y: auto; padding: 16px 0;
+    display: flex; flex-direction: column;
+  }
+  .sidebar-section { padding: 4px 0 8px; }
+  .sidebar-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); padding: 0 16px 6px; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 8px; padding: 7px 16px;
+    cursor: pointer; font-size: 13.5px; color: var(--text-secondary);
+    border-left: 3px solid transparent; transition: background .12s;
+  }
+  .sidebar-item:hover { background: color-mix(in srgb, var(--text-muted) 8%, transparent); }
+  .sidebar-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); font-weight: 600; }
+  .sidebar-item .si-count { margin-left: auto; font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .sidebar-item.active .si-count { color: var(--accent); }
+  .sidebar-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); flex-shrink: 0; }
+  .sidebar-dot.orange { background: var(--warning); }
+
+  /* Board area */
+  .plan-main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .plan-header { padding: 20px 24px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .plan-header h2 { font-size: 20px; font-weight: 700; flex: 1; }
+  .board-wrap { flex: 1; overflow-x: auto; overflow-y: hidden; }
+  .board { display: flex; gap: 0; height: 100%; align-items: flex-start; padding: 16px 20px 20px; }
+
+  /* Columns */
+  .board-col { flex-shrink: 0; width: 260px; margin-right: 12px; display: flex; flex-direction: column; max-height: 100%; }
+  .col-head { display: flex; align-items: center; gap: 6px; padding: 6px 4px 10px; }
+  .col-name { font-size: 14px; font-weight: 600; color: var(--text-primary); flex: 1; outline: none; background: none; border: none; font: inherit; }
+  .col-name:focus { outline: 1px solid var(--accent); border-radius: 4px; padding: 1px 4px; }
+  .col-count-badge { font-size: 12px; color: var(--text-muted); background: color-mix(in srgb, var(--text-muted) 15%, transparent); border-radius: 999px; padding: 1px 8px; }
+  .col-add-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 18px; padding: 0 4px; border-radius: 4px; }
+  .col-add-btn:hover { background: color-mix(in srgb, var(--text-muted) 12%, transparent); color: var(--text-primary); }
+  .col-del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; padding: 0 4px; border-radius: 4px; opacity: 0; transition: opacity .15s; }
+  .board-col:hover .col-del-btn { opacity: 1; }
+  .col-del-btn:hover { color: var(--critical); }
+
+  .col-tasks { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 6px; padding-right: 2px; }
+
+  /* Task card */
+  .task-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .task-card:hover { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .task-check { width: 16px; height: 16px; border: 1.5px solid var(--text-muted); border-radius: 50%; flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .12s, border-color .12s; }
+  .task-check:hover { border-color: var(--accent); }
+  .task-check.done { background: var(--good); border-color: var(--good); }
+  .task-check.done::after { content: "✓"; font-size: 9px; color: #fff; font-weight: 700; }
+  .task-body { flex: 1; min-width: 0; }
+  .task-name { font-size: 13px; line-height: 1.35; color: var(--text-primary); word-break: break-word; }
+  .task-name.done-text { text-decoration: line-through; color: var(--text-muted); }
+  .task-dl { font-size: 11px; margin-top: 4px; color: var(--text-muted); }
+  .task-dl.overdue { color: var(--critical); font-weight: 600; }
+
+  /* Done section */
+  .done-toggle { font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 8px 4px 4px; display: flex; align-items: center; gap: 5px; user-select: none; }
+  .done-toggle .arrow { transition: transform .2s; }
+  .done-toggle.open .arrow { transform: rotate(90deg); }
+  .done-section { display: none; flex-direction: column; gap: 6px; }
+  .done-section.open { display: flex; }
+
+  /* Add task inline */
+  .add-task-row { display: flex; gap: 8px; align-items: center; padding: 6px 4px; }
+  .add-task-input { flex: 1; font: inherit; font-size: 13px; padding: 7px 10px; border: 1px solid var(--gridline); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); outline: none; }
+  .add-task-input:focus { border-color: var(--accent); }
+  .add-task-btn-inline { padding: 7px 12px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .add-col-btn { flex-shrink: 0; width: 240px; background: color-mix(in srgb, var(--text-muted) 8%, transparent); border: 2px dashed var(--gridline); border-radius: 10px; padding: 14px; color: var(--text-muted); font: inherit; font-size: 13px; cursor: pointer; text-align: center; align-self: flex-start; transition: border-color .15s, color .15s; }
+  .add-col-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Buttons */
+  .btn { padding: 7px 14px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; border: none; }
+  .btn-p { background: var(--accent); color: #fff; }
+  .btn-p:hover { opacity: .88; }
+  .btn-g { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+  .btn-g:hover { border-color: var(--text-muted); }
+  .btn-d { background: var(--critical-bg); color: var(--critical); }
+
+  /* Task modal */
+  .mo { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .mo.hidden { display: none; }
+  .modal { background: var(--surface-1); border-radius: 14px; padding: 24px; width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+  .modal h3 { font-size: 16px; font-weight: 600; }
+  .fl { font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px; }
+  .modal input, .modal textarea, .modal select { width: 100%; font: inherit; font-size: 13px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--gridline); background: var(--page); color: var(--text-primary); outline: none; }
+  .modal input:focus, .modal textarea:focus, .modal select:focus { border-color: var(--accent); }
+  .modal textarea { resize: vertical; min-height: 60px; }
+  .mg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ma { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">Мой дашборд</span>
+  <button class="nav-tab active" data-tab="agents">Conductor агенты</button>
+  <button class="nav-tab" data-tab="projects">Проекты</button>
+  <button class="nav-tab" data-tab="planning">Планирование</button>
+  <span class="nav-right"><span class="dot"></span><span id="live-label">localStorage</span></span>
+</nav>
+
+<!-- AGENTS -->
+<div class="page active" id="tab-agents">
+  <div style="padding:28px 28px 60px;max-width:1280px;margin:0 auto">
+    <div class="stats">
+      <div class="stat"><div class="num" id="s-p">–</div><div class="label">проектов</div></div>
+      <div class="stat"><div class="num" id="s-s">–</div><div class="label">сессий/агентов</div></div>
+      <div class="stat"><div class="num" id="s-d">–</div><div class="label">с изменениями</div></div>
+      <div class="stat"><div class="num" id="s-u">–</div><div class="label">дублей веток</div></div>
+    </div>
+    <h2 style="font-size:15px;font-weight:600;margin:0 0 2px">Git-репозитории</h2>
+    <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 14px">Данные из ~/conductor/workspaces · синхронизировано 2026-09-21 · обновляются по запросу «обнови дашборд»</p>
+    <div class="proj-list" id="proj-list"></div>
+    <div class="legend">
+      <span><span class="status good">✓ чисто</span></span>
+      <span><span class="status warning">◐ N/M</span> — ≤5 файлов</span>
+      <span><span class="status critical">● N/M</span> — больше 5</span>
+      <span><span class="flag critical">⚠ дубли</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div class="page" id="tab-projects">
+  <div style="padding:28px 28px 60px;max-width:1280px;margin:0 auto">
+    <div class="pg-header">
+      <div style="flex:1"><h2 style="font-size:15px;font-weight:600;margin:0 0 2px">Мои проекты</h2><p style="font-size:12.5px;color:var(--text-muted);margin:0">Кликни карточку из БД для редактирования · Скажи Claude добавить новую</p></div>
+      <button class="btn btn-p" id="add-proj-btn">+ Добавить</button>
+    </div>
+    <div class="project-grid" id="project-grid"></div>
+  </div>
+</div>
+
+<!-- PLANNING -->
+<div class="page" id="tab-planning">
+  <div class="plan-sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Период</div>
+      <div class="sidebar-item" data-month="all"><span>Все</span><span class="si-count" id="cnt-all">–</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">По месяцам</div>
+      <div id="month-list"></div>
+    </div>
+  </div>
+  <div class="plan-main">
+    <div class="plan-header">
+      <h2 id="board-title">Все задачи</h2>
+      <button class="btn btn-p" id="add-col-header-btn">+ Колонка</button>
+    </div>
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="mo hidden" id="mo">
+  <div class="modal">
+    <h3 id="m-title">Задача</h3>
+    <div><label class="fl">Название</label><input id="m-n" type="text" placeholder="Название задачи…"></div>
+    <div><label class="fl">Заметка</label><textarea id="m-d" placeholder="Детали…" rows="2"></textarea></div>
+    <div class="mg">
+      <div><label class="fl">Дедлайн</label><input id="m-dl" type="date"></div>
+      <div><label class="fl">Колонка</label><select id="m-col"></select></div>
+    </div>
+    <div class="ma">
+      <button class="btn btn-d" id="m-del" style="display:none">Удалить</button>
+      <button class="btn btn-g" id="m-cancel">Отмена</button>
+      <button class="btn btn-p" id="m-save">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Helpers ────────────────────────────────────────────────────
+function esc(s) { return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+// ── Nav ────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-tab').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+}));
+
+// ── Storage ────────────────────────────────────────────────────
+const LS = 'dash_v2';
+function load() { try { return JSON.parse(localStorage.getItem(LS)) || defaultData(); } catch { return defaultData(); } }
+function save() { localStorage.setItem(LS, JSON.stringify(DATA)); }
+function defaultData() {
+  return {
+    projects: [],
+    plan: {
+      months: {
+        '2026-09': { cols: [{id:'c1',name:'ЕНТ'},{id:'c2',name:'Маркетинг'},{id:'c3',name:'Конкуренты'},{id:'c4',name:'Мероприятия'}], tasks: [] },
+        '2026-10': { cols: [{id:'c1',name:'ЕНТ'},{id:'c2',name:'Маркетинг'},{id:'c3',name:'Конкуренты'},{id:'c4',name:'Мероприятия'}], tasks: [] },
+      }
+    }
+  };
+}
+let DATA = load();
+
+// ── Conductor agents ───────────────────────────────────────────
+const AUTO_DATA = [{"project":"advisor","session":"da-nang","branch":"flameelement01/marathon-blood-tests","last_msg":"init advisor workspace","last_date":"2026-03-14","changes":20},{"project":"advisor","session":"toronto","branch":"flameelement01/sheets-automation","last_msg":"Deploy: bot for payments, city routing and AmoCRM sync","last_date":"2026-07-18","changes":17},{"project":"advisor","session":"yokohama","branch":"flameelement01/managers-dashboard","last_msg":"init advisor workspace","last_date":"2026-03-14","changes":2},{"project":"aiplus-mbti","session":"washington","branch":"flameelement01/agents-guide","last_msg":"ИОП: 4 специальности по приоритету + таблица как в скрине + html2canvas PDF","last_date":"2026-04-23","changes":4},{"project":"aiplus-training","session":"belo-horizonte","branch":"flameelement01/amocrm-integration","last_msg":"Initial commit: портал обучения стажёров Aiplus","last_date":"2026-03-14","changes":0},{"project":"aiplus-training","session":"london","branch":"flameelement01/task-1","last_msg":"Initial commit: портал обучения стажёров Aiplus","last_date":"2026-03-14","changes":1},{"project":"dogovor-bot","session":"create-web-app","branch":"flameelement01/create-web-app","last_msg":"Initial commit","last_date":"2026-05-28","changes":1},{"project":"dogovor-bot","session":"lisbon","branch":"flameelement01/create-web-app","last_msg":"Initial commit","last_date":"2026-05-28","changes":1},{"project":"dogovor_bot","session":"ip-type-graduation-classes","branch":"flameelement01/ip-type-graduation-classes","last_msg":"Fix contract generation: update templates and all field-fill logic","last_date":"2026-08-10","changes":7},{"project":"dogovor_bot","session":"regina","branch":"flameelement01/ip-type-graduation-classes","last_msg":"Fix contract generation: update templates and all field-fill logic","last_date":"2026-08-10","changes":7},{"project":"erp","session":"fetch-erp-student-data","branch":"flameelement01/fetch-erp-student-data","last_msg":"Initial commit","last_date":"2026-08-13","changes":2},{"project":"erp","session":"ndjamena","branch":"flameelement01/fetch-erp-student-data","last_msg":"Initial commit","last_date":"2026-08-13","changes":2},{"project":"obsidian","session":"cd-obsidian-tomiris","branch":"flameelement01/cd-obsidian-tomiris","last_msg":"Initial commit","last_date":"2026-05-21","changes":0},{"project":"obsidian","session":"san-jose","branch":"flameelement01/cd-obsidian-tomiris","last_msg":"Initial commit","last_date":"2026-05-21","changes":0},{"project":"orchestrator","session":"doha","branch":"flameelement01/telegram-bot-setup","last_msg":"init orchestrator workspace","last_date":"2026-03-14","changes":11},{"project":"orchestrator","session":"prague","branch":"flameelement01/study-code","last_msg":"Fix: restore broken math/physics symbols in ENT questions JSON","last_date":"2026-05-15","changes":6},{"project":"tg-amo-bot","session":"irvine","branch":"flameelement01/run-tg-bot","last_msg":"Initial commit: AmoCRM + Sipuni Telegram bot","last_date":"2026-03-09","changes":0}];
+const PDESC = {"advisor":"Боты и дашборды: оплаты/лиды Шымкент, AmoCRM, дашборд менеджеров","aiplus-mbti":"Калькулятор ИОП/MBTI с генерацией PDF, парсинг вузов","aiplus-training":"Портал обучения стажёров AIPlus","dogovor-bot":"Заготовка (scaffold), не развита","dogovor_bot":"Telegram-бот договоров + сверка AMO ↔ ERP","erp":"Калькулятор и аналитика ERP по Шымкенту","obsidian":"Карта проектов Conductor в Obsidian","orchestrator":"Оркестрация продаж (AmoCRM + БД), ЕНТ-диагностика, PDF-отчёты","tg-amo-bot":"Telegram-бот: интеграция AmoCRM + Sipuni (звонки)"};
+function sf(c) { return c===0?["good","✓","чисто"]:c<=5?["warning","◐",`${c} файлов`]:["critical","●",`${c} файлов`]; }
+
+(function renderAgents(){
+  const by={};
+  for(const r of AUTO_DATA)(by[r.project]??=[]).push(r);
+  const dp=new Set(),dj=new Set();
+  for(const[p,ss]of Object.entries(by)){const seen=new Set();for(const r of ss){if(seen.has(r.branch)){dp.add(p+"::"+r.branch);dj.add(p);}seen.add(r.branch);}}
+  let h="";
+  for(const[p,ss]of Object.entries(by).sort()){
+    const n=ss.length,w=n===1?"сессия":n<=4?"сессии":"сессий";
+    const mc=Math.max(...ss.map(s=>s.changes)),dn=ss.filter(s=>s.changes>0).length;
+    const[c,i]=sf(mc),agg=mc===0?"чисто":`${dn}/${n} с изменениями`;
+    const ld=ss.reduce((a,s)=>s.last_date>a?s.last_date:a,ss[0].last_date);
+    const df=dj.has(p)?`<span class="flag critical">⚠ дубли</span>`:"";
+    const rows=ss.map(r=>{const[sc,si,sl]=sf(r.changes);return`<tr><td class="sc">${esc(r.session)}</td><td><code>${esc(r.branch)}</code></td><td class="cc" title="${esc(r.last_msg)}">${esc(r.last_msg)}</td><td class="nc">${esc(r.last_date)}</td><td><span class="status ${sc}">${si} ${sl}</span></td></tr>`;}).join("");
+    h+=`<details class="proj-card"><summary><span class="proj-name">${esc(p)}</span><span class="proj-desc">${esc(PDESC[p]||"")}</span><span class="status ${c}">${i} ${agg}</span>${df}<span class="proj-date">${esc(ld)}</span><span class="proj-count">${n} ${w} ▸</span></summary><div class="session-detail"><table><thead><tr><th>Сессия</th><th>Ветка</th><th>Последний коммит</th><th>Дата</th><th>Статус</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
+  }
+  document.getElementById("proj-list").innerHTML=h;
+  document.getElementById("s-p").textContent=Object.keys(by).length;
+  document.getElementById("s-s").textContent=AUTO_DATA.length;
+  document.getElementById("s-d").textContent=AUTO_DATA.filter(r=>r.changes>0).length;
+  document.getElementById("s-u").textContent=dp.size;
+})();
+
+// ── Projects tab ───────────────────────────────────────────────
+const STATIC_PROJS=[
+  {id:"sp1",title:"AIplus — ИОП-калькулятор",desc:"ИОП, MBTI, рекомендации вузов, генерация PDF",status:"active",tag:"conductor",repo:"aiplus-mbti",updated:"2026-04-23"},
+  {id:"sp2",title:"Aiplus Training — Портал стажёров",desc:"Веб-портал для обучения новых сотрудников AIplus",status:"active",tag:"conductor",repo:"aiplus-training",updated:"2026-03-14"},
+  {id:"sp3",title:"Advisor — AmoCRM боты",desc:"Telegram-бот оплат, маршрутизации, синхронизация с AmoCRM Шымкент",status:"active",tag:"conductor",repo:"advisor",updated:"2026-07-18"},
+  {id:"sp4",title:"Advisor — Дашборд менеджеров",desc:"Google Apps Script, KPI и аналитика продаж",status:"paused",tag:"conductor",repo:"advisor",updated:"2026-03-14"},
+  {id:"sp5",title:"Договор-бот",desc:"Telegram-бот генерации PDF-договоров + сверка AMO ↔ ERP",status:"active",tag:"conductor",repo:"dogovor_bot",updated:"2026-08-10"},
+  {id:"sp6",title:"ERP — Аналитика Шымкент",desc:"Калькулятор и аналитика по ERP-системе для Шымкента",status:"active",tag:"conductor",repo:"erp",updated:"2026-08-13"},
+  {id:"sp7",title:"Orchestrator — AmoCRM + ЕНТ",desc:"Оркестрация продаж, ЕНТ-диагностика, PDF-отчёты",status:"active",tag:"conductor",repo:"orchestrator",updated:"2026-05-15"},
+  {id:"sp8",title:"Telegram-бот AmoCRM + Sipuni",desc:"Интеграция Telegram с AmoCRM и телефонией Sipuni",status:"done",tag:"conductor",repo:"tg-amo-bot",updated:"2026-03-09"},
+];
+const SL={active:"В работе",paused:"Пауза",idea:"Идея",done:"Готово",blocked:"Блок"};
+const SC={active:"accent",paused:"warning",idea:"warning",done:"good",blocked:"critical"};
+let _editProjId=null;
+
+function renderProjects(){
+  const dbItems=DATA.projects.map(p=>({...p,_lid:p.id}));
+  const all=[...STATIC_PROJS,...dbItems];
+  document.getElementById("project-grid").innerHTML=all.map(p=>{
+    const isDb=!!p._lid;
+    return`<div class="project-card${isDb?" editable":""}"${isDb?` onclick="openProjModal('${p._lid}')"`:""}">
+      <div class="card-head"><div class="card-title">${esc(p.title)}</div>
+      <span class="status ${SC[p.status]||"accent"}" style="font-size:11px;padding:2px 8px;flex-shrink:0">${SL[p.status]||p.status}</span></div>
+      <div class="card-desc">${esc(p.desc||"")}</div>
+      <div class="card-meta">
+        <span class="card-tag ${p.tag||""}">${p.tag==="conductor"?"Conductor":p.tag==="work"?"Работа":"Другое"}</span>
+        ${p.repo?`<span class="card-tag" style="opacity:.65">${esc(p.repo)}</span>`:""}
+        ${p.updated?`<span class="card-date">${esc(p.updated)}</span>`:""}
+      </div></div>`;
+  }).join("");
+}
+renderProjects();
+
+document.getElementById("add-proj-btn").addEventListener("click",()=>{
+  const id=uid();
+  DATA.projects.push({id,title:"",desc:"",status:"active",tag:"work",updated:new Date().toISOString().slice(0,10)});
+  save(); renderProjects(); openProjModal(id);
+});
+
+// ── Planning ───────────────────────────────────────────────────
+let _curMonth="all", _editTaskId=null, _editTaskMonth=null;
+const NOW=new Date(), CUR_MONTH=`${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
+
+function planMonths() { return Object.keys(DATA.plan.months).sort(); }
+
+function monthLabel(key) {
+  const[y,m]=key.split('-');
+  return MONTHS[parseInt(m)-1]+' '+y;
+}
+
+function allTasks() {
+  const arr=[];
+  for(const[mk,md]of Object.entries(DATA.plan.months))
+    for(const t of(md.tasks||[]))arr.push({...t,_month:mk});
+  return arr;
+}
+
+function renderSidebar() {
+  const all=allTasks();
+  document.getElementById("cnt-all").textContent=all.filter(t=>!t.done).length;
+  const ml=document.getElementById("month-list");
+  ml.innerHTML=planMonths().map(mk=>{
+    const cnt=(DATA.plan.months[mk].tasks||[]).filter(t=>!t.done).length;
+    const isActive=mk===CUR_MONTH;
+    return`<div class="sidebar-item${_curMonth===mk?" active":""}" data-month="${mk}">
+      ${isActive?`<span class="sidebar-dot orange"></span>`:""}
+      <span>${monthLabel(mk)}</span>
+      <span class="si-count">${cnt||""}</span>
+    </div>`;
+  }).join("")+`<div class="sidebar-item" id="add-month-btn" style="color:var(--accent);cursor:pointer">+ Новый месяц</div>`;
+  ml.querySelectorAll(".sidebar-item[data-month]").forEach(el=>{
+    el.addEventListener("click",()=>{ _curMonth=el.dataset.month; renderSidebar(); renderBoard(); });
+  });
+  document.querySelector(".sidebar-item[data-month='all']").addEventListener("click",()=>{ _curMonth="all"; renderSidebar(); renderBoard(); });
+  document.getElementById("add-month-btn")?.addEventListener("click",addMonth);
+}
+
+function addMonth(){
+  const months=planMonths();
+  let last=months.length?months[months.length-1]:CUR_MONTH;
+  const[y,m]=last.split('-').map(Number);
+  let nm=m+1,ny=y;
+  if(nm>12){nm=1;ny++;}
+  const key=`${ny}-${String(nm).padStart(2,'0')}`;
+  if(!DATA.plan.months[key]){
+    DATA.plan.months[key]={cols:[{id:'c1',name:'ЕНТ'},{id:'c2',name:'Маркетинг'},{id:'c3',name:'Конкуренты'},{id:'c4',name:'Мероприятия'}],tasks:[]};
+  }
+  _curMonth=key; save(); renderSidebar(); renderBoard();
+}
+
+function getCols(){
+  if(_curMonth==="all"){
+    const seen=new Set(),cols=[];
+    for(const md of Object.values(DATA.plan.months))
+      for(const c of(md.cols||[]))if(!seen.has(c.name)){seen.add(c.name);cols.push({...c,id:c.name});}
+    return cols;
+  }
+  return DATA.plan.months[_curMonth]?.cols||[];
+}
+
+function getTasksForMonth(mk){return DATA.plan.months[mk]?.tasks||[];}
+
+function renderBoard(){
+  const title=_curMonth==="all"?"Все задачи":monthLabel(_curMonth);
+  document.getElementById("board-title").textContent=title;
+  const cols=getCols();
+  let html="";
+  for(const col of cols){
+    const tasks=(_curMonth==="all"?allTasks():getTasksForMonth(_curMonth).map(t=>({...t,_month:_curMonth}))).filter(t=>t.col===col.id||t.col===col.name);
+    const active=tasks.filter(t=>!t.done);
+    const done=tasks.filter(t=>t.done);
+    const tHtml=active.map(t=>taskCardHtml(t)).join("");
+    const dHtml=done.map(t=>taskCardHtml(t)).join("");
+    html+=`<div class="board-col" data-col="${esc(col.id)}">
+      <div class="col-head">
+        <span class="col-name" contenteditable="${_curMonth!=="all"}" data-colid="${esc(col.id)}" onblur="renameCol(this)">${esc(col.name)}</span>
+        <span class="col-count-badge">${active.length}</span>
+        ${_curMonth!=="all"?`<button class="col-add-btn" onclick="startAddTask('${esc(col.id)}')">+</button>`:""}
+        ${_curMonth!=="all"?`<button class="col-del-btn" onclick="deleteCol('${esc(col.id)}')">✕</button>`:""}
+      </div>
+      <div class="col-tasks">
+        ${tHtml}
+        <div id="add-row-${esc(col.id)}" style="display:none">
+          <div class="add-task-row">
+            <input class="add-task-input" placeholder="Название задачи…" id="new-task-input-${esc(col.id)}"
+              onkeydown="if(event.key==='Enter')commitAddTask('${esc(col.id)}');if(event.key==='Escape')cancelAddTask('${esc(col.id)}')">
+            <button class="add-task-btn-inline" onclick="commitAddTask('${esc(col.id)}')">Добавить</button>
+          </div>
+        </div>
+        ${done.length?`<div class="done-toggle" onclick="toggleDone(this)"><span class="arrow">▶</span> Выполнено ${done.length}</div>
+        <div class="done-section">${dHtml}</div>`:""}
+      </div>
+    </div>`;
+  }
+  if(_curMonth!=="all"){
+    html+=`<button class="add-col-btn" onclick="addCol()">+ Новая колонка</button>`;
+  }
+  document.getElementById("board").innerHTML=html;
+}
+
+function taskCardHtml(t){
+  const isDone=!!t.done;
+  const dl=t.deadline?formatDate(t.deadline,isDone):"";
+  return`<div class="task-card" onclick="openTaskModal('${esc(t.id)}','${esc(t._month)}')">
+    <div class="task-check${isDone?" done":""}" onclick="event.stopPropagation();toggleTask('${esc(t.id)}','${esc(t._month)}')"></div>
+    <div class="task-body">
+      <div class="task-name${isDone?" done-text":""}">${esc(t.name)}</div>
+      ${dl}
+    </div>
+  </div>`;
+}
+
+function formatDate(dl,isDone){
+  const d=new Date(dl+"T00:00:00");
+  const now=new Date(); now.setHours(0,0,0,0);
+  const overdue=!isDone&&d<now;
+  const label=d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"});
+  return`<div class="task-dl${overdue?" overdue":""}">${label}</div>`;
+}
+
+function toggleDone(el){
+  el.classList.toggle("open");
+  el.nextElementSibling.classList.toggle("open");
+}
+
+function toggleTask(id,month){
+  const tasks=DATA.plan.months[month]?.tasks||[];
+  const t=tasks.find(t=>t.id===id);
+  if(t){t.done=!t.done;save();renderBoard();renderSidebar();}
+}
+
+function startAddTask(colId){
+  document.getElementById("add-row-"+colId).style.display="block";
+  document.getElementById("new-task-input-"+colId).focus();
+}
+function cancelAddTask(colId){
+  document.getElementById("add-row-"+colId).style.display="none";
+  document.getElementById("new-task-input-"+colId).value="";
+}
+function commitAddTask(colId){
+  const inp=document.getElementById("new-task-input-"+colId);
+  const name=inp.value.trim();
+  if(!name){cancelAddTask(colId);return;}
+  const mk=_curMonth==="all"?CUR_MONTH:_curMonth;
+  if(!DATA.plan.months[mk])DATA.plan.months[mk]={cols:[],tasks:[]};
+  DATA.plan.months[mk].tasks.push({id:uid(),name,col:colId,done:false,deadline:"",note:"",created:Date.now()});
+  save(); inp.value=""; cancelAddTask(colId); renderBoard(); renderSidebar();
+}
+
+function addCol(){
+  if(_curMonth==="all")return;
+  const name=prompt("Название колонки:");
+  if(!name?.trim())return;
+  const md=DATA.plan.months[_curMonth];
+  if(!md)return;
+  md.cols.push({id:uid(),name:name.trim()});
+  save(); renderBoard();
+}
+
+function deleteCol(colId){
+  if(_curMonth==="all")return;
+  if(!confirm("Удалить колонку и все её задачи?"))return;
+  const md=DATA.plan.months[_curMonth];
+  md.cols=md.cols.filter(c=>c.id!==colId);
+  md.tasks=md.tasks.filter(t=>t.col!==colId);
+  save(); renderBoard();
+}
+
+function renameCol(el){
+  if(_curMonth==="all")return;
+  const colId=el.dataset.colid;
+  const newName=el.textContent.trim();
+  if(!newName)return;
+  const md=DATA.plan.months[_curMonth];
+  const col=md?.cols?.find(c=>c.id===colId);
+  if(col){col.name=newName;save();}
+}
+
+// ── Task modal ─────────────────────────────────────────────────
+function openTaskModal(id,month){
+  const tasks=DATA.plan.months[month]?.tasks||[];
+  const t=tasks.find(t=>t.id===id);
+  if(!t)return;
+  _editTaskId=id; _editTaskMonth=month;
+  document.getElementById("m-title").textContent="Редактировать задачу";
+  document.getElementById("m-n").value=t.name||"";
+  document.getElementById("m-d").value=t.note||"";
+  document.getElementById("m-dl").value=t.deadline||"";
+  // Col select
+  const cols=DATA.plan.months[month]?.cols||[];
+  document.getElementById("m-col").innerHTML=cols.map(c=>`<option value="${esc(c.id)}"${t.col===c.id?" selected":""}>${esc(c.name)}</option>`).join("");
+  document.getElementById("m-del").style.display="block";
+  document.getElementById("mo").classList.remove("hidden");
+}
+
+document.getElementById("m-cancel").addEventListener("click",closeModal);
+document.getElementById("mo").addEventListener("click",e=>{if(e.target===document.getElementById("mo"))closeModal();});
+
+document.getElementById("m-save").addEventListener("click",()=>{
+  if(!_editTaskId||!_editTaskMonth)return;
+  const tasks=DATA.plan.months[_editTaskMonth]?.tasks||[];
+  const t=tasks.find(t=>t.id===_editTaskId);
+  if(!t)return;
+  t.name=document.getElementById("m-n").value;
+  t.note=document.getElementById("m-d").value;
+  t.deadline=document.getElementById("m-dl").value;
+  t.col=document.getElementById("m-col").value;
+  save(); renderBoard(); renderSidebar(); closeModal();
+});
+
+document.getElementById("m-del").addEventListener("click",()=>{
+  if(!_editTaskId||!_editTaskMonth||!confirm("Удалить задачу?"))return;
+  const md=DATA.plan.months[_editTaskMonth];
+  md.tasks=md.tasks.filter(t=>t.id!==_editTaskId);
+  save(); renderBoard(); renderSidebar(); closeModal();
+});
+
+function closeModal(){
+  document.getElementById("mo").classList.add("hidden");
+  _editTaskId=null; _editTaskMonth=null; _editProjId=null;
+}
+
+// ── Add col from header ────────────────────────────────────────
+document.getElementById("add-col-header-btn").addEventListener("click",()=>{
+  if(_curMonth==="all"){ alert("Выбери месяц слева"); return; }
+  addCol();
+});
+
+// ── Project modal ──────────────────────────────────────────────
+function openProjModal(id){
+  const p=DATA.projects.find(p=>p.id===id);
+  if(!p)return;
+  _editProjId=id; _editTaskId=null; _editTaskMonth=null;
+  document.getElementById("m-title").textContent="Редактировать проект";
+  document.getElementById("m-n").value=p.title||"";
+  document.getElementById("m-d").value=p.desc||"";
+  document.getElementById("m-dl").value="";
+  document.getElementById("m-col").innerHTML=`<option>—</option>`;
+  document.getElementById("m-del").style.display="block";
+  document.getElementById("mo").classList.remove("hidden");
+}
+// Override save for project
+const origSave = document.getElementById("m-save").onclick;
+document.getElementById("m-save").addEventListener("click",()=>{
+  if(!_editProjId)return;
+  const p=DATA.projects.find(p=>p.id===_editProjId);
+  if(!p)return;
+  p.title=document.getElementById("m-n").value;
+  p.desc=document.getElementById("m-d").value;
+  save(); renderProjects(); closeModal();
+},{capture:false});
+document.getElementById("m-del").addEventListener("click",()=>{
+  if(!_editProjId||!confirm("Удалить проект?"))return;
+  DATA.projects=DATA.projects.filter(p=>p.id!==_editProjId);
+  save(); renderProjects(); closeModal();
+},{capture:false});
+
+// ── Init planning ──────────────────────────────────────────────
+_curMonth=CUR_MONTH;
+if(!DATA.plan.months[CUR_MONTH])addMonth();
+renderSidebar();
+renderBoard();
+</script>
+</body>
+</html>
