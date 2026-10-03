@@ -420,6 +420,29 @@
     .mg { grid-template-columns: 1fr; }
   }
 
+  /* ── Requests tab ── */
+  .req-filter-sel { font:inherit; font-size:13px; padding:6px 10px; border:1px solid var(--border); border-radius:8px; background:var(--page); color:var(--text-primary); outline:none; cursor:pointer; }
+  .req-filter-sel:focus { border-color:var(--accent); }
+  .req-search { flex:1; min-width:160px; font:inherit; font-size:13px; padding:6px 10px; border:1px solid var(--border); border-radius:8px; background:var(--page); color:var(--text-primary); outline:none; }
+  .req-search:focus { border-color:var(--accent); }
+  .req-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .req-table th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted); font-weight:600; padding:8px 12px; border-bottom:1px solid var(--gridline); white-space:nowrap; }
+  .req-row { border-bottom:1px solid var(--gridline); cursor:pointer; transition:background .1s; }
+  .req-row:last-child { border-bottom:none; }
+  .req-row:hover { background:color-mix(in srgb, var(--accent) 5%, transparent); }
+  .req-row td { padding:10px 12px; color:var(--text-secondary); vertical-align:middle; }
+  .req-student { font-weight:600; color:var(--text-primary); font-size:13px; }
+  .req-text-cell { max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .req-dl.overdue { color:var(--critical); font-weight:600; }
+  .req-empty { padding:60px 20px; text-align:center; color:var(--text-muted); font-size:14px; }
+  @media (max-width:768px) {
+    .req-table thead { display:none; }
+    .req-table, .req-table tbody, .req-row, .req-row td { display:block; }
+    .req-row { margin-bottom:10px; background:var(--surface-1); border:1px solid var(--border); border-radius:var(--radius); padding:4px 0; }
+    .req-row td { padding:5px 14px; border:none; }
+    .req-text-cell { max-width:none; white-space:normal; }
+  }
+
 </style>
 </head>
 <body>
@@ -431,6 +454,7 @@
   <button class="nav-tab" data-tab="planning">Планирование</button>
   <button class="nav-tab" data-tab="tools">Инструменты</button>
   <button class="nav-tab" data-tab="team">Команда</button>
+  <button class="nav-tab" data-tab="requests">📬 Запросы</button>
   <button class="nav-tab" data-tab="docs">Регламенты</button>
   <div class="nav-actions">
     <button onclick="openGS()" title="Поиск" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:15px;padding:4px 8px;border-radius:6px;transition:color .15s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">🔍</button>
@@ -440,6 +464,7 @@
         <div class="qadd-item" onclick="qaTask()">📋 Задача</div>
         <div class="qadd-item" onclick="qaProject()">🗂 Проект</div>
         <div class="qadd-item" onclick="qaDoc()">📄 Документ</div>
+        <div class="qadd-item" onclick="qaRequest()">📬 Запрос</div>
         <div class="qadd-item" onclick="qaScratch()">✏️ Заметка</div>
       </div>
     </div>
@@ -557,6 +582,34 @@
   </div>
 </div>
 
+<!-- REQUESTS -->
+<div class="page" id="tab-requests">
+  <div style="padding:28px 28px 60px;max-width:1280px;margin:0 auto">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="flex:1">
+        <h2 style="font-size:15px;font-weight:600;margin:0 0 2px">Запросы от родителей</h2>
+        <p style="font-size:12.5px;color:var(--text-muted);margin:0">Контроль выполнения · просрочки выделяются автоматически</p>
+      </div>
+      <button class="btn btn-p" id="add-req-btn">+ Новый запрос</button>
+    </div>
+    <div class="stats" id="req-stats"></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <select id="rf-status" class="req-filter-sel" onchange="renderRequests()">
+        <option value="">Все статусы</option>
+        <option value="new">Новые</option>
+        <option value="inprogress">В работе</option>
+        <option value="overdue">Просрочены</option>
+        <option value="done">Выполнены</option>
+      </select>
+      <select id="rf-mentor" class="req-filter-sel" onchange="renderRequests()">
+        <option value="">Все менторы</option>
+      </select>
+      <input type="text" id="rf-search" class="req-search" placeholder="Поиск по ученику, запросу…" oninput="renderRequests()">
+    </div>
+    <div id="req-list"></div>
+  </div>
+</div>
+
 <!-- MANAGER SIDE-PANEL -->
 <div class="mgr-mo" id="mgr-mo" onclick="if(event.target===this)closeMgr()">
   <div class="mgr-panel">
@@ -637,6 +690,51 @@
     <div class="ma">
       <button class="btn btn-g" onclick="closeRuleModal()">Отмена</button>
       <button class="btn btn-p" onclick="saveRule()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Request Modal -->
+<div class="mo hidden" id="req-mo">
+  <div class="modal" style="max-width:520px">
+    <h3 id="rm-title">Новый запрос</h3>
+    <div class="mg">
+      <div><label class="fl">Ученик</label><input id="rm-student" type="text" placeholder="Фамилия Имя"></div>
+      <div><label class="fl">Класс</label><input id="rm-grade" type="text" placeholder="10А"></div>
+    </div>
+    <div class="mg">
+      <div><label class="fl">Родитель</label><input id="rm-parent" type="text" placeholder="Фамилия Имя"></div>
+      <div><label class="fl">Телефон родителя</label><input id="rm-contact" type="tel" placeholder="+7…"></div>
+    </div>
+    <div><label class="fl">Запрос (описание проблемы)</label><textarea id="rm-text" rows="3" placeholder="Опишите запрос родителя…"></textarea></div>
+    <div class="mg">
+      <div><label class="fl">Ментор (кто передал)</label>
+        <input id="rm-mentor" list="req-mentor-list" type="text" placeholder="Имя ментора">
+        <datalist id="req-mentor-list"></datalist>
+      </div>
+      <div><label class="fl">Дедлайн</label><input id="rm-deadline" type="date"></div>
+    </div>
+    <div class="mg">
+      <div><label class="fl">Статус</label>
+        <select id="rm-status">
+          <option value="new">Новый</option>
+          <option value="inprogress">В работе</option>
+          <option value="done">Выполнен</option>
+        </select>
+      </div>
+      <div><label class="fl">Источник</label>
+        <select id="rm-source">
+          <option value="telegram">Telegram</option>
+          <option value="phone">Звонок</option>
+          <option value="other">Другое</option>
+        </select>
+      </div>
+    </div>
+    <div><label class="fl">Комментарий / Результат</label><textarea id="rm-comment" rows="2" placeholder="Результат выполнения или примечание…"></textarea></div>
+    <div class="ma">
+      <button class="btn btn-d" id="rm-del" style="display:none" onclick="deleteReq()">Удалить</button>
+      <button class="btn btn-g" onclick="closeReqModal()">Отмена</button>
+      <button class="btn btn-p" onclick="saveReqModal()">Сохранить</button>
     </div>
   </div>
 </div>
@@ -2159,6 +2257,11 @@ function qaDoc() {
   switchTab('docs');
   setTimeout(() => newDoc(), 80);
 }
+function qaRequest() {
+  closeQAdd();
+  switchTab('requests');
+  setTimeout(() => openReqModal(null), 80);
+}
 
 // ── Add rule to doc ────────────────────────────────────────────
 function openRuleModal() {
@@ -2217,6 +2320,179 @@ function saveRule() {
   if (changed) save();
 })();
 
+// ── Requests (Запросы от родителей) ────────────────────────────
+if (!DATA.requests) { DATA.requests = []; save(); }
+
+let _editReqId = null;
+const REQ_STATUS_LABEL = { new: 'Новый', inprogress: 'В работе', done: 'Выполнен', overdue: 'Просрочен' };
+const REQ_STATUS_CLASS = { new: 'accent', inprogress: 'warning', done: 'good', overdue: 'critical' };
+
+function reqStatus(r) {
+  if (r.status === 'done') return 'done';
+  if (r.deadline) {
+    const d = new Date(r.deadline + 'T00:00:00');
+    const now = new Date(); now.setHours(0,0,0,0);
+    if (d < now) return 'overdue';
+  }
+  return r.status || 'new';
+}
+
+function renderReqStats() {
+  const all = DATA.requests || [];
+  const statuses = all.map(r => reqStatus(r));
+  const open = statuses.filter(s => s !== 'done').length;
+  const overdue = statuses.filter(s => s === 'overdue').length;
+  const done = statuses.filter(s => s === 'done').length;
+  const el = document.getElementById('req-stats');
+  if (!el) return;
+  el.innerHTML =
+    `<div class="stat"><div class="num" style="color:var(--accent)">${open}</div><div class="label">открытых</div></div>` +
+    `<div class="stat"><div class="num" style="color:var(--critical)">${overdue}</div><div class="label">просрочено</div></div>` +
+    `<div class="stat"><div class="num" style="color:var(--good)">${done}</div><div class="label">выполнено</div></div>` +
+    `<div class="stat"><div class="num">${all.length}</div><div class="label">всего</div></div>`;
+}
+
+function renderReqMentorFilter() {
+  const mentors = [...new Set((DATA.requests||[]).map(r=>r.mentor).filter(Boolean))].sort();
+  const el = document.getElementById('rf-mentor');
+  if (!el) return;
+  const cur = el.value;
+  el.innerHTML = `<option value="">Все менторы</option>` +
+    mentors.map(m=>`<option value="${esc(m)}"${m===cur?' selected':''}>${esc(m)}</option>`).join('');
+}
+
+function renderRequests() {
+  const status = document.getElementById('rf-status')?.value || '';
+  const mentor = document.getElementById('rf-mentor')?.value || '';
+  const search = (document.getElementById('rf-search')?.value || '').toLowerCase().trim();
+
+  let items = (DATA.requests || []).filter(r => {
+    const rs = reqStatus(r);
+    if (status && rs !== status) return false;
+    if (mentor && r.mentor !== mentor) return false;
+    if (search && !([r.student, r.text, r.parent, r.mentor, r.comment].join(' ').toLowerCase().includes(search))) return false;
+    return true;
+  });
+
+  const ord = {overdue:0, new:1, inprogress:2, done:3};
+  items = items.slice().sort((a, b) => {
+    const sa = reqStatus(a), sb = reqStatus(b);
+    if (ord[sa] !== ord[sb]) return ord[sa] - ord[sb];
+    if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline);
+    if (a.deadline) return -1;
+    if (b.deadline) return 1;
+    return (b.created||0) - (a.created||0);
+  });
+
+  const el = document.getElementById('req-list');
+  if (!el) return;
+  if (!items.length) {
+    el.innerHTML = `<div class="req-empty">📭 Нет запросов${status||mentor||search?' по выбранному фильтру':''}</div>`;
+    renderReqStats(); renderReqMentorFilter(); return;
+  }
+
+  const rows = items.map(r => {
+    const rs = reqStatus(r);
+    const dl = r.deadline ? new Date(r.deadline+'T00:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'}) : '—';
+    const created = new Date(r.created).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+    return `<tr class="req-row" onclick="openReqModal('${esc(r.id)}')">
+      <td><span class="status ${REQ_STATUS_CLASS[rs]}">${REQ_STATUS_LABEL[rs]}</span></td>
+      <td><div class="req-student">${esc(r.student||'—')}</div>${r.grade?`<div style="font-size:11px;color:var(--text-muted)">${esc(r.grade)}</div>`:''}</td>
+      <td>${esc(r.parent||'—')}${r.contact?`<br><a href="tel:${esc(r.contact)}" onclick="event.stopPropagation()" style="font-size:11px;color:var(--accent)">${esc(r.contact)}</a>`:''}</td>
+      <td class="req-text-cell" title="${esc(r.text||'')}">${esc(r.text||'—')}</td>
+      <td style="font-size:12px;color:var(--text-secondary)">${esc(r.mentor||'—')}</td>
+      <td style="font-size:12px;white-space:nowrap${rs==='overdue'?';color:var(--critical);font-weight:600':''}">${dl}${rs==='overdue'?' ⚠️':''}</td>
+      <td style="font-size:11px;color:var(--text-muted);white-space:nowrap">${created}</td>
+      <td onclick="event.stopPropagation()" style="white-space:nowrap">
+        ${rs!=='done'?`<button class="btn btn-g" style="padding:4px 10px;font-size:12px" onclick="markReqDone('${esc(r.id)}')">✓ Готово</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<div style="background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);overflow-x:auto">
+    <table class="req-table">
+      <thead><tr>
+        <th>Статус</th><th>Ученик</th><th>Родитель</th>
+        <th>Запрос</th><th>Ментор</th><th>Дедлайн</th><th>Добавлен</th><th></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+
+  renderReqStats(); renderReqMentorFilter();
+}
+
+function markReqDone(id) {
+  const r = (DATA.requests||[]).find(r => r.id === id);
+  if (!r) return;
+  r.status = 'done';
+  save(); renderRequests();
+}
+
+function openReqModal(id) {
+  const r = id ? (DATA.requests||[]).find(r => r.id === id) : null;
+  _editReqId = id || null;
+  document.getElementById('rm-title').textContent = r ? 'Редактировать запрос' : 'Новый запрос';
+  document.getElementById('rm-student').value = r?.student || '';
+  document.getElementById('rm-grade').value = r?.grade || '';
+  document.getElementById('rm-parent').value = r?.parent || '';
+  document.getElementById('rm-contact').value = r?.contact || '';
+  document.getElementById('rm-text').value = r?.text || '';
+  document.getElementById('rm-mentor').value = r?.mentor || '';
+  document.getElementById('rm-deadline').value = r?.deadline || '';
+  document.getElementById('rm-status').value = r?.status || 'new';
+  document.getElementById('rm-comment').value = r?.comment || '';
+  document.getElementById('rm-source').value = r?.source || 'telegram';
+  document.getElementById('rm-del').style.display = r ? 'block' : 'none';
+  const dl = document.getElementById('req-mentor-list');
+  if (dl) dl.innerHTML = (DATA.team||[]).map(m=>m.name).filter(Boolean).map(m=>`<option value="${esc(m)}">`).join('');
+  document.getElementById('req-mo').classList.remove('hidden');
+  setTimeout(() => document.getElementById('rm-student').focus(), 50);
+}
+
+function closeReqModal() {
+  document.getElementById('req-mo').classList.add('hidden');
+  _editReqId = null;
+}
+
+function saveReqModal() {
+  if (!DATA.requests) DATA.requests = [];
+  const student = document.getElementById('rm-student').value.trim();
+  const text = document.getElementById('rm-text').value.trim();
+  if (!student && !text) { document.getElementById('rm-student').focus(); return; }
+  const existing = _editReqId ? DATA.requests.find(r => r.id === _editReqId) : null;
+  const req = {
+    id: _editReqId || uid(),
+    created: existing?.created || Date.now(),
+    student, grade: document.getElementById('rm-grade').value.trim(),
+    parent: document.getElementById('rm-parent').value.trim(),
+    contact: document.getElementById('rm-contact').value.trim(),
+    text, mentor: document.getElementById('rm-mentor').value.trim(),
+    deadline: document.getElementById('rm-deadline').value,
+    status: document.getElementById('rm-status').value,
+    comment: document.getElementById('rm-comment').value.trim(),
+    source: document.getElementById('rm-source').value,
+  };
+  if (_editReqId) {
+    const idx = DATA.requests.findIndex(r => r.id === _editReqId);
+    if (idx >= 0) DATA.requests[idx] = req; else DATA.requests.push(req);
+  } else {
+    DATA.requests.push(req);
+  }
+  save(); renderRequests(); closeReqModal();
+}
+
+function deleteReq() {
+  if (!_editReqId || !confirm('Удалить запрос?')) return;
+  DATA.requests = (DATA.requests||[]).filter(r => r.id !== _editReqId);
+  save(); renderRequests(); closeReqModal();
+}
+
+document.getElementById('req-mo').addEventListener('click', e => { if (e.target === document.getElementById('req-mo')) closeReqModal(); });
+document.getElementById('add-req-btn').addEventListener('click', () => openReqModal(null));
+
+renderRequests();
+
 // ── Init new tabs ──────────────────────────────────────────────
 renderTeam();
 renderDeadlines();
@@ -2261,6 +2537,9 @@ openDoc = function(id) {
 
 <!-- MORE MENU (mobile) -->
 <div class="more-menu" id="more-menu">
+  <div class="more-menu-item" onclick="switchTabMobile('requests',null);toggleMoreMenu()">
+    <span class="mi-icon">📬</span><span>Запросы</span>
+  </div>
   <div class="more-menu-item" onclick="switchTabMobile('projects',null);toggleMoreMenu()">
     <span class="mi-icon">🗂</span><span>Проекты</span>
   </div>
