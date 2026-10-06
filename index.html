@@ -456,6 +456,7 @@
   <button class="nav-tab" data-tab="team">Команда</button>
   <button class="nav-tab" data-tab="requests">📬 Запросы</button>
   <button class="nav-tab" data-tab="docs">Регламенты</button>
+  <button class="nav-tab" data-tab="referral">🤝 Реферальная</button>
   <div class="nav-actions">
     <button onclick="openGS()" title="Поиск" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:15px;padding:4px 8px;border-radius:6px;transition:color .15s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">🔍</button>
     <div class="qadd-wrap">
@@ -583,6 +584,45 @@
 </div>
 
 <!-- REQUESTS -->
+
+<div class="page" id="tab-referral">
+  <div style="padding:28px 28px 60px;max-width:1280px;margin:0 auto">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="flex:1">
+        <h2 style="font-size:15px;font-weight:600;margin:0 0 2px">🤝 Реферальная программа</h2>
+        <p style="font-size:12.5px;color:var(--text-muted);margin:0">Заявки партнёров · образовательный центр Aiplus</p>
+      </div>
+      <a href="https://forms.gle/uS986VLsAA7RvDnY6" target="_blank" class="btn btn-p" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">📝 Подать заявку</a>
+      <a href="https://docs.google.com/spreadsheets/d/1jna2FCrQIJWxmteMa7jeZ10_9nQFGZ1Eqg9V9CtoFy4/edit?gid=1942059536" target="_blank" class="btn btn-g" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">📊 Открыть таблицу</a>
+    </div>
+    <div class="stats" id="ref-stats">
+      <div class="stat"><div class="num" id="ref-total">—</div><div class="label">Всего заявок</div></div>
+      <div class="stat"><div class="num" id="ref-ent">—</div><div class="label">Ученики ЕНТ</div></div>
+      <div class="stat"><div class="num" id="ref-parent">—</div><div class="label">Родители</div></div>
+      <div class="stat"><div class="num" id="ref-partner">—</div><div class="label">Партнёры</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <select id="ref-city-filter" class="req-filter-sel" onchange="renderReferralTable()">
+        <option value="">Все города</option><option value="Астана">Астана</option><option value="Алматы">Алматы</option>
+      </select>
+      <select id="ref-status-filter" class="req-filter-sel" onchange="renderReferralTable()">
+        <option value="">Все статусы</option><option value="ent">Ученик ЕНТ</option><option value="parent">Родитель</option><option value="partner">Партнёр</option>
+      </select>
+      <select id="ref-client-filter" class="req-filter-sel" onchange="renderReferralTable()">
+        <option value="">Кем является</option><option value="child">Ребёнок</option><option value="parentclient">Родитель</option>
+      </select>
+      <input id="ref-search" type="text" class="req-search" placeholder="Поиск по имени, телефону…" oninput="renderReferralTable()">
+      <span id="ref-count-label" style="font-size:12px;color:var(--text-muted);margin-left:auto"></span>
+    </div>
+    <div style="background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)">
+      <div id="ref-table-wrap" style="overflow-x:auto">
+        <div style="padding:40px;text-align:center;color:var(--text-muted);font-size:13px">⏳ Загрузка данных…</div>
+      </div>
+      <div id="ref-pagination" style="display:none;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);font-size:12.5px;color:var(--text-muted)"></div>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="tab-requests">
   <div style="padding:28px 28px 60px;max-width:1280px;margin:0 auto">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
@@ -2225,6 +2265,7 @@ function switchToDoc(id) {
 }
 
 function switchTab(tab) {
+  if (tab === 'referral') maybeLoadReferral();
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const btn = document.querySelector(`.nav-tab[data-tab="${tab}"]`);
@@ -2514,6 +2555,152 @@ openDoc = function(id) {
   document.getElementById('doc-rule-btn').style.display = '';
 };
 
+// ── REFERRAL PROGRAM ──────────────────────────────
+const REFERRAL_CSV = 'https://docs.google.com/spreadsheets/d/1jna2FCrQIJWxmteMa7jeZ10_9nQFGZ1Eqg9V9CtoFy4/export?format=csv&gid=1942059536';
+let refRows = [];
+let refPage = 0;
+const REF_PAGE_SIZE = 50;
+
+function parseRefCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return [];
+  return lines.map(function(line) {
+    const cells = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+      else if (c === ',' && !inQ) { cells.push(cur); cur = ''; }
+      else cur += c;
+    }
+    cells.push(cur);
+    return cells;
+  });
+}
+
+async function loadReferralData() {
+  try {
+    const res = await fetch(REFERRAL_CSV + '&t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const rows = parseRefCSV(text);
+    if (rows.length < 2) throw new Error('empty');
+    refRows = rows.slice(1).filter(function(r){ return r[0]; }).map(function(r) {
+      return { ts:r[0]||'', city:r[1]||'', name:r[2]||'', phone:r[3]||'',
+               status:r[4]||'', cname:r[5]||'', cphone:r[6]||'', ctype:r[7]||'', note:r[8]||'' };
+    });
+    updateRefStats();
+    renderReferralTable();
+  } catch(e) {
+    const wrap = document.getElementById('ref-table-wrap');
+    if (wrap) wrap.innerHTML =
+      '<div style="text-align:center;padding:20px 16px">' +
+      '<p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Таблица открывается после входа в Google-аккаунт</p>' +
+      '<iframe src="https://docs.google.com/spreadsheets/d/1jna2FCrQIJWxmteMa7jeZ10_9nQFGZ1Eqg9V9CtoFy4/htmlview?gid=1942059536&single=true"' +
+      ' width="100%" height="560" style="border:none;display:block" loading="lazy"></iframe></div>';
+    const el = document.getElementById('ref-total');
+    if (el) el.textContent = '1919+';
+    ['ref-ent','ref-parent','ref-partner'].forEach(function(id) {
+      const e = document.getElementById(id); if (e) e.textContent = '—';
+    });
+  }
+}
+
+function updateRefStats() {
+  const t = refRows.length;
+  const ent     = refRows.filter(function(r){ return r.status.includes('ЕНТ') || r.status.includes('ҰБТ оқушысы'); }).length;
+  const parent  = refRows.filter(function(r){ return r.status.includes('ата-ана') || r.status.toLowerCase().includes('родитель'); }).length;
+  const partner = refRows.filter(function(r){ return r.status.includes('Серіктес') || r.status.includes('Партнер'); }).length;
+  const s = function(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; };
+  s('ref-total',   t.toLocaleString('ru'));
+  s('ref-ent',     ent.toLocaleString('ru'));
+  s('ref-parent',  parent.toLocaleString('ru'));
+  s('ref-partner', partner.toLocaleString('ru'));
+}
+
+function getFilteredRefRows() {
+  const city = (document.getElementById('ref-city-filter')||{}).value||'';
+  const st   = (document.getElementById('ref-status-filter')||{}).value||'';
+  const ct   = (document.getElementById('ref-client-filter')||{}).value||'';
+  const q    = ((document.getElementById('ref-search')||{}).value||'').toLowerCase().trim();
+  return refRows.filter(function(r) {
+    if (city && r.city !== city) return false;
+    if (st==='ent'     && !(r.status.includes('ЕНТ') || r.status.includes('ҰБТ оқушысы'))) return false;
+    if (st==='parent'  && !(r.status.includes('ата-ана') || r.status.toLowerCase().includes('родитель'))) return false;
+    if (st==='partner' && !(r.status.includes('Серіктес') || r.status.includes('Партнер'))) return false;
+    if (ct==='child'        && !(r.ctype.includes('Ребен') || r.ctype.includes('Оқушы'))) return false;
+    if (ct==='parentclient' && !(r.ctype.includes('Родитель') || r.ctype.includes('Ата-ана'))) return false;
+    if (q && !r.name.toLowerCase().includes(q) && !r.cname.toLowerCase().includes(q) &&
+             !r.phone.toLowerCase().includes(q) && !r.cphone.toLowerCase().includes(q) &&
+             !r.city.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function refStatusBadge(s) {
+  if (s.includes('ЕНТ') || s.includes('ҰБТ оқушысы'))
+    return '<span style="background:var(--accent-bg);color:var(--accent);font-size:11px;padding:2px 7px;border-radius:12px;white-space:nowrap">🎓 Ученик ЕНТ</span>';
+  if (s.includes('ата-ана') || s.toLowerCase().includes('родитель'))
+    return '<span style="background:var(--good-bg);color:var(--good);font-size:11px;padding:2px 7px;border-radius:12px;white-space:nowrap">👪 Родитель</span>';
+  if (s.includes('Серіктес') || s.includes('Партнер'))
+    return '<span style="background:var(--warning-bg);color:var(--warning);font-size:11px;padding:2px 7px;border-radius:12px;white-space:nowrap">🤝 Партнёр</span>';
+  return '<span style="font-size:11px;color:var(--text-muted)">' + esc(s.slice(0,28)) + '</span>';
+}
+
+function refCtypeBadge(t) {
+  if (t.includes('Ребен') || t.includes('Оқушы')) return '👦 Ребёнок';
+  if (t.includes('Родитель') || t.includes('Ата-ана')) return '👩 Родитель';
+  return esc(t);
+}
+
+function renderReferralTable() {
+  if (!refRows.length) return;
+  const filtered = getFilteredRefRows();
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / REF_PAGE_SIZE));
+  if (refPage >= pages) refPage = 0;
+  const slice = filtered.slice(refPage * REF_PAGE_SIZE, (refPage + 1) * REF_PAGE_SIZE);
+  const lbl = document.getElementById('ref-count-label');
+  if (lbl) lbl.textContent = total + ' записей';
+  const wrap = document.getElementById('ref-table-wrap');
+  if (!wrap) return;
+  if (!slice.length) {
+    wrap.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:13px">Нет данных по выбранным фильтрам</div>';
+  } else {
+    const thead = '<thead><tr style="border-bottom:1px solid var(--gridline)">' +
+      ['Дата','Партнёр','Статус','Потенциальный клиент','Кем является','Город','Комментарий'].map(function(h) {
+        return '<th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600;white-space:nowrap">' + h + '</th>';
+      }).join('') + '</tr></thead>';
+    const tbody = '<tbody>' + slice.map(function(r, i) {
+      const bg = i%2===1 ? 'color-mix(in srgb, var(--text-muted) 3%, transparent)' : 'transparent';
+      return '<tr style="border-bottom:1px solid var(--gridline);background:' + bg + '">' +
+        '<td style="padding:8px 12px;color:var(--text-muted);white-space:nowrap;font-size:12px">' + r.ts.slice(0,10) + '</td>' +
+        '<td style="padding:8px 12px"><div style="font-weight:500;color:var(--text-primary)">' + esc(r.name) + '</div><div style="font-size:11px;color:var(--text-muted)">' + esc(r.phone) + '</div></td>' +
+        '<td style="padding:8px 12px">' + refStatusBadge(r.status) + '</td>' +
+        '<td style="padding:8px 12px"><div style="font-weight:500;color:var(--text-primary)">' + esc(r.cname) + '</div><div style="font-size:11px;color:var(--text-muted)">' + esc(r.cphone) + '</div></td>' +
+        '<td style="padding:8px 12px;font-size:12px;color:var(--text-secondary);white-space:nowrap">' + refCtypeBadge(r.ctype) + '</td>' +
+        '<td style="padding:8px 12px;font-size:12px;color:var(--text-muted);white-space:nowrap">' + esc(r.city) + '</td>' +
+        '<td style="padding:8px 12px;font-size:12px;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(r.note) + '">' + esc(r.note) + '</td>' +
+        '</tr>';
+    }).join('') + '</tbody>';
+    wrap.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;min-width:780px">' + thead + tbody + '</table>';
+  }
+  const pg = document.getElementById('ref-pagination');
+  if (pg) {
+    pg.style.display = 'flex';
+    pg.innerHTML = '<span>Страница ' + (refPage+1) + ' из ' + pages + ' · ' + total + ' записей</span>' +
+      '<div style="display:flex;gap:6px">' +
+      '<button onclick="refPage=Math.max(0,refPage-1);renderReferralTable()" ' + (refPage===0?'disabled':'') + ' class="btn btn-g" style="padding:4px 10px;font-size:12px">← Пред</button>' +
+      '<button onclick="refPage=Math.min(' + (pages-1) + ',refPage+1);renderReferralTable()" ' + (refPage>=pages-1?'disabled':'') + ' class="btn btn-g" style="padding:4px 10px;font-size:12px">След →</button></div>';
+  }
+}
+
+let refLoaded = false;
+function maybeLoadReferral() {
+  if (!refLoaded) { refLoaded = true; loadReferralData(); }
+}
+// ── END REFERRAL ──────────────────────────────────
+
 </script>
 
 <!-- MOBILE BOTTOM NAV -->
@@ -2537,6 +2724,9 @@ openDoc = function(id) {
 
 <!-- MORE MENU (mobile) -->
 <div class="more-menu" id="more-menu">
+  <div class="more-menu-item" onclick="switchTabMobile('referral',null);toggleMoreMenu()">
+    <span class="mi-icon">🤝</span><span>Реферальная</span>
+  </div>
   <div class="more-menu-item" onclick="switchTabMobile('requests',null);toggleMoreMenu()">
     <span class="mi-icon">📬</span><span>Запросы</span>
   </div>
