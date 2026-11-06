@@ -443,6 +443,15 @@
     .req-text-cell { max-width:none; white-space:normal; }
   }
 
+  .rfn-city-btn {
+    background: none; border: none; cursor: pointer; padding: 8px 14px;
+    font-size: 13px; font-weight: 500; color: var(--text-muted);
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: color .15s, border-color .15s;
+  }
+  .rfn-city-btn:hover { color: var(--text-primary); }
+  .rfn-city-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -613,55 +622,51 @@
 
 <!-- REFUNDS -->
 <div class="page" id="tab-refunds">
-  <div style="padding:28px 28px 60px;max-width:1280px;margin:0 auto">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:14px">
+  <div style="padding:20px 28px 60px;max-width:1280px;margin:0 auto">
+
+    <!-- City tabs -->
+    <div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:0;margin-bottom:20px;border-bottom:1px solid var(--border)">
+      <button class="rfn-city-btn active" data-city="shymkent"  onclick="rfnSwitchCity(this)">Шымкент</button>
+      <button class="rfn-city-btn" data-city="almaty"    onclick="rfnSwitchCity(this)">Алматы</button>
+      <button class="rfn-city-btn" data-city="astana"    onclick="rfnSwitchCity(this)">Астана</button>
+      <button class="rfn-city-btn" data-city="atyrau"    onclick="rfnSwitchCity(this)">Атырау</button>
+      <button class="rfn-city-btn" data-city="aktobe"    onclick="rfnSwitchCity(this)">Актобе</button>
+      <button class="rfn-city-btn" data-city="online"    onclick="rfnSwitchCity(this)">Онлайн</button>
+      <button class="rfn-city-btn" data-city="kyzylorda" onclick="rfnSwitchCity(this)">Кызылорда</button>
+    </div>
+
+    <!-- Header -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
       <div>
-        <h2 style="font-size:18px;font-weight:700;margin:0 0 4px">Возвраты</h2>
-        <div style="font-size:12.5px;color:var(--text-muted)" id="rfn-updated">Загружаем...</div>
+        <h2 style="font-size:18px;font-weight:700;margin:0 0 3px" id="rfn-city-title">Возвраты — Шымкент</h2>
+        <div style="font-size:12px;color:var(--text-muted)" id="rfn-updated">—</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <div class="stat"><div class="num" id="rfn-pending-amt" style="font-size:18px">–</div><div class="label">к выдаче (₸)</div></div>
-        <div class="stat"><div class="num" id="rfn-completed-amt" style="font-size:18px">–</div><div class="label">выдано (₸)</div></div>
-        <div class="stat"><div class="num" id="rfn-count">–</div><div class="label">заявок</div></div>
+        <div class="stat" style="min-width:110px"><div class="num" id="rfn-pending-amt" style="font-size:17px;color:var(--warning)">–</div><div class="label">к выдаче (₸)</div></div>
+        <div class="stat" style="min-width:110px"><div class="num" id="rfn-completed-amt" style="font-size:17px;color:var(--good)">–</div><div class="label">выдано (₸)</div></div>
+        <div class="stat"><div class="num" id="rfn-count" style="font-size:17px">–</div><div class="label">заявок</div></div>
       </div>
     </div>
+
+    <!-- Filters -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
-      <select id="rfn-month" style="padding:7px 12px;border:1px solid var(--gridline);border-radius:8px;background:var(--surface-1);color:var(--text-primary);font:inherit;font-size:13px;outline:none;cursor:pointer">
-        <option value="">Все месяцы</option>
-      </select>
-      <input id="rfn-search" placeholder="Поиск по ученику..." style="padding:7px 12px;border:1px solid var(--gridline);border-radius:8px;background:var(--surface-1);color:var(--text-primary);font:inherit;font-size:13px;outline:none;flex:1;min-width:160px">
+      <input id="rfn-search" placeholder="🔍 Поиск по ученику..." style="padding:7px 12px;border:1px solid var(--gridline);border-radius:8px;background:var(--surface-1);color:var(--text-primary);font:inherit;font-size:13px;outline:none;flex:1;min-width:180px">
       <select id="rfn-klass" style="padding:7px 12px;border:1px solid var(--gridline);border-radius:8px;background:var(--surface-1);color:var(--text-primary);font:inherit;font-size:13px;outline:none;cursor:pointer">
         <option value="">Все классы</option>
       </select>
-      <select id="rfn-farmer" style="padding:7px 12px;border:1px solid var(--gridline);border-radius:8px;background:var(--surface-1);color:var(--text-primary);font:inherit;font-size:13px;outline:none;cursor:pointer">
-        <option value="">Все менеджеры</option>
-      </select>
       <select id="rfn-status" style="padding:7px 12px;border:1px solid var(--gridline);border-radius:8px;background:var(--surface-1);color:var(--text-primary);font:inherit;font-size:13px;outline:none;cursor:pointer">
         <option value="">Все статусы</option>
-        <option value="pending">Ожидает</option>
-        <option value="completed">Выдан</option>
+        <option value="pending">⏳ Ожидает</option>
+        <option value="completed">✓ Выдан</option>
       </select>
+      <button onclick="loadRefunds(true)" style="padding:7px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface-1);color:var(--text-secondary);font:inherit;font-size:13px;cursor:pointer">↻ Обновить</button>
     </div>
-    <div style="background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:700px">
-        <thead>
-          <tr style="border-bottom:1px solid var(--gridline)">
-            <th style="text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600">Ученик</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600">Класс</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600">Менеджер</th>
-            <th style="text-align:right;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600">Сумма</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600">Статус</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600">Дата заявл.</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600">Срок выдачи</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600">AmoCRM</th>
-          </tr>
-        </thead>
-        <tbody id="rfn-tbody">
-          <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">Загружаем данные...</td></tr>
-        </tbody>
-      </table>
+
+    <!-- Manager cards -->
+    <div id="rfn-managers" style="display:flex;flex-direction:column;gap:10px">
+      <div style="text-align:center;padding:60px;color:var(--text-muted)">Загружаем данные...</div>
     </div>
-    <div id="rfn-footer" style="margin-top:10px;font-size:12px;color:var(--text-muted)"></div>
+
   </div>
 </div>
 
@@ -2554,107 +2559,155 @@ renderDeadlines();
 
 // ── Refunds ─────────────────────────────────────────────────────
 const RFN_URL = 'https://script.google.com/macros/s/AKfycbzU8J3cZKWIlm41CXBNQ1DUQBibwOhZrCU3SkzSbprhcx0EhtVBDsSK-lVXPUfIt0E/exec';
-let rfnAllRows = [], rfnLoaded = false;
+let rfnCity = 'shymkent';
+let rfnCache = {}; // city → data
+let rfnData = null;
 
-function loadRefunds() {
-  if (rfnLoaded) { renderRefunds(); return; }
-  document.getElementById('rfn-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">Загружаем данные...</td></tr>';
-  fetch(RFN_URL + '?action=refundsRaw')
+function rfnSwitchCity(btn) {
+  document.querySelectorAll('.rfn-city-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rfnCity = btn.dataset.city;
+  document.getElementById('rfn-city-title').textContent = 'Возвраты — ' + btn.textContent;
+  loadRefunds(false);
+}
+
+function loadRefunds(forceReload) {
+  if (!forceReload && rfnCache[rfnCity]) {
+    rfnData = rfnCache[rfnCity];
+    renderRefunds();
+    return;
+  }
+  document.getElementById('rfn-managers').innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted)">Загружаем данные...</div>';
+  document.getElementById('rfn-updated').textContent = 'Загружаем...';
+
+  fetch(RFN_URL + '?action=cityRefunds&city=' + rfnCity)
     .then(r => r.json())
     .then(data => {
       if (data.error) throw new Error(data.error);
-      rfnAllRows = data.rows || [];
-      rfnLoaded = true;
-      const now = new Date();
-      const months = [...new Set(rfnAllRows.map(r => `${r.year}-${String(r.month).padStart(2,'0')}`))].sort().reverse();
-      const mSel = document.getElementById('rfn-month');
-      months.forEach(m => {
-        const [y, mo] = m.split('-');
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = MONTHS[+mo-1] + ' ' + y;
-        if (+y === now.getFullYear() && +mo === now.getMonth()+1) opt.selected = true;
-        mSel.appendChild(opt);
-      });
-      const klasses = [...new Set(rfnAllRows.map(r => r.klass).filter(Boolean))].sort((a,b)=>+a-+b||a.localeCompare(b));
+      rfnCache[rfnCity] = data;
+      rfnData = data;
+
+      // Populate class filter
       const ks = document.getElementById('rfn-klass');
-      klasses.forEach(k => { const o = document.createElement('option'); o.value = k; o.textContent = k + ' кл.'; ks.appendChild(o); });
-      const farmers = [...new Set(rfnAllRows.map(r => r.farmer).filter(Boolean))].sort();
-      const fs = document.getElementById('rfn-farmer');
-      farmers.forEach(f => { const o = document.createElement('option'); o.value = f; o.textContent = f; fs.appendChild(o); });
-      if (data.updatedAt) document.getElementById('rfn-updated').textContent = 'Обновлено: ' + new Date(data.updatedAt).toLocaleString('ru');
+      const allRows = (data.managers || []).flatMap(m => [...m.pending, ...m.completed]);
+      const klasses = [...new Set(allRows.map(r => r.klass).filter(Boolean))].sort((a,b)=>+a-+b||a.localeCompare(b));
+      ks.innerHTML = '<option value="">Все классы</option>';
+      klasses.forEach(k => { const o = document.createElement('option'); o.value=k; o.textContent=k+' кл.'; ks.appendChild(o); });
+
+      if (data.updatedAt) document.getElementById('rfn-updated').textContent = 'Обновлено: ' + new Date(data.updatedAt).toLocaleTimeString('ru');
       renderRefunds();
     })
     .catch(e => {
-      document.getElementById('rfn-tbody').innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--critical)">Ошибка: ${esc(e.message)}</td></tr>`;
-      document.getElementById('rfn-updated').textContent = 'Ошибка загрузки';
+      document.getElementById('rfn-managers').innerHTML = `<div style="text-align:center;padding:40px;color:var(--critical)">Ошибка загрузки: ${esc(e.message)}</div>`;
+      document.getElementById('rfn-updated').textContent = 'Ошибка';
     });
 }
 
-function rfnFiltered() {
-  const month  = document.getElementById('rfn-month').value;
+function rfnFilter(rows) {
   const q      = document.getElementById('rfn-search').value.trim().toLowerCase();
   const klass  = document.getElementById('rfn-klass').value;
-  const farmer = document.getElementById('rfn-farmer').value;
   const status = document.getElementById('rfn-status').value;
-  return rfnAllRows.filter(r => {
-    if (month) { const [y,mo] = month.split('-'); if (r.year !== +y || r.month !== +mo) return false; }
-    if (q && !r.student.toLowerCase().includes(q)) return false;
-    if (klass  && r.klass  !== klass)  return false;
-    if (farmer && r.farmer !== farmer) return false;
+  return rows.filter(r => {
+    if (q     && !r.student.toLowerCase().includes(q)) return false;
+    if (klass && r.klass !== klass)  return false;
     if (status && r.status !== status) return false;
     return true;
   });
 }
 
 function renderRefunds() {
-  const rows = rfnFiltered();
-  const pendingAmt   = rows.filter(r => r.status==='pending').reduce((s,r) => s+r.amount, 0);
-  const completedAmt = rows.filter(r => r.status==='completed').reduce((s,r) => s+r.amount, 0);
-  document.getElementById('rfn-pending-amt').textContent   = pendingAmt.toLocaleString('ru');
-  document.getElementById('rfn-completed-amt').textContent = completedAmt.toLocaleString('ru');
-  document.getElementById('rfn-count').textContent = rows.length;
-  const tbody = document.getElementById('rfn-tbody');
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">Нет данных по выбранным фильтрам</td></tr>';
-    document.getElementById('rfn-footer').textContent = '';
-    return;
-  }
+  if (!rfnData) return;
   const today = new Date(); today.setHours(0,0,0,0);
-  tbody.innerHTML = rows.map(r => {
-    let dlStyle = 'color:var(--text-secondary)';
-    if (r.deadline && r.status === 'pending') {
-      const [d,m,y] = r.deadline.split('.').map(Number);
-      if (new Date(y,m-1,d) < today) dlStyle = 'color:var(--critical);font-weight:600';
-    }
-    const badge = r.status === 'completed'
-      ? '<span class="status good" style="font-size:11px">✓ Выдан</span>'
-      : '<span class="status warning" style="font-size:11px">⏳ Ожидает</span>';
-    const amo = r.amoUrl
-      ? `<a href="${r.amoUrl}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-size:12px;white-space:nowrap">→ AmoCRM</a>`
-      : '<span style="color:var(--text-muted)">—</span>';
-    return `<tr style="border-bottom:1px solid var(--gridline)">
-      <td style="padding:9px 14px;font-weight:500;white-space:nowrap">${esc(r.student)}</td>
-      <td style="padding:9px 14px;color:var(--text-muted)">${esc(r.klass)||'—'}</td>
-      <td style="padding:9px 14px;color:var(--text-secondary);white-space:nowrap">${esc(r.farmer)}</td>
-      <td style="padding:9px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap">${r.amount.toLocaleString('ru')} ₸</td>
-      <td style="padding:9px 14px">${badge}</td>
-      <td style="padding:9px 14px;color:var(--text-muted);white-space:nowrap">${r.appDate||'—'}</td>
-      <td style="padding:9px 14px;${dlStyle};white-space:nowrap">${r.deadline||'—'}</td>
-      <td style="padding:9px 14px">${amo}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('rfn-footer').textContent = `Показано ${rows.length} из ${rfnAllRows.length} записей`;
+  const q      = document.getElementById('rfn-search').value.trim().toLowerCase();
+  const klass  = document.getElementById('rfn-klass').value;
+  const status = document.getElementById('rfn-status').value;
+
+  let totalPending = 0, totalCompleted = 0, totalCount = 0;
+  const cards = (rfnData.managers || []).map(mgr => {
+    const pending   = rfnFilter(mgr.pending.map(r=>({...r,status:'pending'})));
+    const completed = rfnFilter(mgr.completed.map(r=>({...r,status:'completed'})));
+    if (!pending.length && !completed.length) return '';
+
+    const pAmt = pending.reduce((s,r)=>s+r.amount,0);
+    const cAmt = completed.reduce((s,r)=>s+r.amount,0);
+    totalPending   += pAmt;
+    totalCompleted += cAmt;
+    totalCount     += pending.length + completed.length;
+
+    const rowHtml = rows => rows.map(r => {
+      let dlStyle = '';
+      if (r.deadline && r.status === 'pending') {
+        const [d,m,y] = r.deadline.split('.').map(Number);
+        if (new Date(y,m-1,d) < today) dlStyle = 'color:var(--critical);font-weight:600';
+      }
+      const amo = r.amoUrl
+        ? `<a href="${r.amoUrl}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-size:12px">→ AmoCRM</a>`
+        : '<span style="color:var(--text-muted);font-size:12px">—</span>';
+      return `<tr style="border-bottom:1px solid var(--gridline)">
+        <td style="padding:8px 14px;font-weight:500">${esc(r.student)}</td>
+        <td style="padding:8px 14px;color:var(--text-muted);font-size:12px">${esc(r.klass)||'—'}</td>
+        <td style="padding:8px 14px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap">${r.amount.toLocaleString('ru')} ₸</td>
+        <td style="padding:8px 14px;${dlStyle};font-size:12px;white-space:nowrap">${r.deadline||r.receipt||'—'}</td>
+        <td style="padding:8px 14px">${amo}</td>
+      </tr>`;
+    }).join('');
+
+    const pendingBlock = pending.length ? `
+      <div style="margin-bottom:4px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--warning);padding:8px 14px 4px">⏳ Ожидает выдачи — ${pending.length} чел. · ${pAmt.toLocaleString('ru')} ₸</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="border-bottom:1px solid var(--gridline)">
+            <th style="text-align:left;padding:5px 14px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase">Ученик</th>
+            <th style="text-align:left;padding:5px 14px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase">Класс</th>
+            <th style="text-align:right;padding:5px 14px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase">Сумма</th>
+            <th style="text-align:left;padding:5px 14px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase">Срок выдачи</th>
+            <th style="text-align:left;padding:5px 14px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase">AmoCRM</th>
+          </tr></thead>
+          <tbody>${rowHtml(pending)}</tbody>
+        </table>
+      </div>` : '';
+
+    const completedBlock = completed.length ? `
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--good);padding:8px 14px 4px">✓ Выдано — ${completed.length} чел. · ${cAmt.toLocaleString('ru')} ₸</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <tbody>${rowHtml(completed)}</tbody>
+        </table>
+      </div>` : '';
+
+    const id = 'rfn-mgr-' + mgr.name.replace(/\s/g,'_');
+    return `<details class="proj-card" id="${id}">
+      <summary>
+        <div style="display:flex;align-items:center;gap:12px;width:100%">
+          <div class="team-avatar" style="width:34px;height:34px;font-size:13px;flex-shrink:0">${esc(mgr.name[0]||'?')}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:14px">${esc(mgr.name)}</div>
+          </div>
+          ${pending.length ? `<span class="status warning" style="font-size:11px">⏳ ${pending.length} · ${pAmt.toLocaleString('ru')} ₸</span>` : ''}
+          ${completed.length ? `<span class="status good" style="font-size:11px">✓ ${completed.length} · ${cAmt.toLocaleString('ru')} ₸</span>` : ''}
+        </div>
+      </summary>
+      <div style="border-top:1px solid var(--gridline)">
+        ${pendingBlock}${completedBlock}
+      </div>
+    </details>`;
+  }).filter(Boolean);
+
+  document.getElementById('rfn-pending-amt').textContent   = totalPending.toLocaleString('ru');
+  document.getElementById('rfn-completed-amt').textContent = totalCompleted.toLocaleString('ru');
+  document.getElementById('rfn-count').textContent = totalCount;
+
+  document.getElementById('rfn-managers').innerHTML = cards.length
+    ? cards.join('')
+    : '<div style="text-align:center;padding:60px;color:var(--text-muted)">Нет данных за текущий месяц</div>';
 }
 
-['rfn-month','rfn-klass','rfn-farmer','rfn-status'].forEach(id => {
+['rfn-klass','rfn-status'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', renderRefunds);
 });
 document.getElementById('rfn-search').addEventListener('input', renderRefunds);
-
-// Trigger load when switching to refunds tab
-document.querySelector('.nav-tab[data-tab="refunds"]').addEventListener('click', loadRefunds);
+document.querySelector('.nav-tab[data-tab="refunds"]').addEventListener('click', () => loadRefunds(false));
 
 // ── Restore last active tab ────────────────────────────────────
 (function restoreTab() {
